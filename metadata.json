@@ -1,0 +1,8 @@
+{
+  "name": "Degree Chord Performer",
+  "description": "PCキーボードやテンキーでディグリーネーム演奏、7th/9thコード付加、Web Audio合成サウンドとWeb MIDI DAW連携機能付きコード演奏アプリ",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
