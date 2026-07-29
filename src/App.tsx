@@ -233,7 +233,12 @@ export default function App() {
       s.activeDegreeNumber = degreeNum;
 
       // Play Sound & Send MIDI with Strum option
-      synthEngine.playChord(chord.midiNotes, s.isStrumEnabled, playVelocity, 35);
+      const midiOutId = midiEngine.getState().selectedOutputId;
+      const isMidiActive = midiOutId && midiOutId !== 'none';
+      
+      if (!isMidiActive) {
+        synthEngine.playChord(chord.midiNotes, s.isStrumEnabled, playVelocity, 35);
+      }
       midiEngine.sendChordNoteOn(chord.midiNotes, s.isStrumEnabled, playVelocity, 35);
 
       chordStartTimeRef.current = Date.now();
@@ -919,7 +924,11 @@ export default function App() {
 
   // Single Note Preview on Piano Roll
   const handlePianoNotePreview = (midiNote: number) => {
-    synthEngine.playNote(midiNote);
+    const midiOutId = midiEngine.getState().selectedOutputId;
+    const isMidiActive = midiOutId && midiOutId !== 'none';
+    if (!isMidiActive) {
+      synthEngine.playNote(midiNote);
+    }
     midiEngine.sendNoteOn(midiNote);
     setTimeout(() => {
       midiEngine.sendNoteOff(midiNote);

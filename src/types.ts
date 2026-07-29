@@ -94,7 +94,7 @@ export interface MidiState {
   isEnabled: boolean;
   outputs: MidiOutputDevice[];
   inputs: MidiInputDevice[];
-  selectedOutputId: string | null;
+  selectedOutputId: string | 'none' | null;
   selectedInputId: string | 'all' | 'none';
   outputChannel: number; // 1-16
   inputChannel: number | 'all'; // 1-16 or 'all'

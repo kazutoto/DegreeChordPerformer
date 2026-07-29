@@ -120,18 +120,21 @@ export const MidiSettingsModal: React.FC<MidiSettingsModalProps> = ({
             <label className="text-xs font-bold text-slate-300">MIDI 出力デバイス / 仮想MIDIポート (Output)</label>
             <select
               disabled={!midiState.isEnabled || midiState.outputs.length === 0}
-              value={midiState.selectedOutputId || ''}
+              value={midiState.selectedOutputId || 'none'}
               onChange={(e) => midiEngine.selectOutput(e.target.value)}
               className="w-full bg-slate-800 border border-slate-700 text-slate-100 font-bold text-sm rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none cursor-pointer disabled:opacity-50"
             >
               {midiState.outputs.length === 0 ? (
                 <option value="">(利用可能なMIDI出力ポートが見つかりません)</option>
               ) : (
-                midiState.outputs.map((dev) => (
-                  <option key={dev.id} value={dev.id}>
-                    {dev.name} ({dev.manufacturer})
-                  </option>
-                ))
+                <>
+                  <option value="none">出力デバイスなし (内蔵音源を使用)</option>
+                  {midiState.outputs.map((dev) => (
+                    <option key={dev.id} value={dev.id}>
+                      {dev.name} ({dev.manufacturer})
+                    </option>
+                  ))}
+                </>
               )}
             </select>
             <p className="text-[11px] text-slate-400">

@@ -40,6 +40,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMidiModal,
   onOpenHelpModal,
 }) => {
+  const isMidiActive = !!(midiState.selectedOutputId && midiState.selectedOutputId !== 'none');
+
   return (
     <header className="bg-slate-900 border-b border-slate-800 text-slate-100 px-4 py-3 sticky top-0 z-30 shadow-md">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
@@ -69,7 +71,9 @@ export const Header: React.FC<HeaderProps> = ({
             <select
               value={preset}
               onChange={(e) => onPresetChange(e.target.value as SoundPreset)}
-              className="bg-transparent text-xs font-semibold text-slate-200 focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-semibold text-slate-200 focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isMidiActive}
+              title={isMidiActive ? "外部MIDI出力中は内蔵音源がミュートされます" : ""}
             >
               <option value="piano" className="bg-slate-800 text-slate-200">グランドピアノ (Piano)</option>
               <option value="epiano" className="bg-slate-800 text-slate-200">エレピ (E.Piano)</option>
@@ -80,22 +84,24 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Volume Control */}
-          <div className="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${isMidiActive ? 'bg-slate-800/40 border-slate-700/50 opacity-50' : 'bg-slate-800/80 border-slate-700'}`}>
             <button
-              onClick={() => onVolumeChange(volume > 0 ? 0 : 0.8)}
-              className="text-slate-400 hover:text-slate-200 transition-colors"
-              title={volume === 0 ? 'ミュート解除' : 'ミュート'}
+              onClick={() => { if (!isMidiActive) onVolumeChange(volume > 0 ? 0 : 0.8) }}
+              className="text-slate-400 hover:text-slate-200 transition-colors disabled:cursor-not-allowed"
+              title={isMidiActive ? '外部MIDI出力中は内蔵音源がミュートされます' : (volume === 0 ? 'ミュート解除' : 'ミュート')}
+              disabled={isMidiActive}
             >
-              {volume === 0 ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4" />}
+              {(volume === 0 || isMidiActive) ? <VolumeX className={`w-4 h-4 ${isMidiActive ? 'text-slate-500' : 'text-red-400'}`} /> : <Volume2 className="w-4 h-4" />}
             </button>
             <input
               type="range"
               min="0"
               max="1"
               step="0.01"
-              value={volume}
+              value={isMidiActive ? 0 : volume}
               onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-              className="w-16 sm:w-20 accent-indigo-500 h-1.5 bg-slate-700 rounded-lg cursor-pointer"
+              disabled={isMidiActive}
+              className={`w-16 sm:w-20 accent-indigo-500 h-1.5 bg-slate-700 rounded-lg ${isMidiActive ? 'cursor-not-allowed' : 'cursor-pointer'}`}
             />
           </div>
 

@@ -96,7 +96,10 @@ class MidiEngine {
 
     // Auto-select first device if none selected or if previous device lost
     if (outDevices.length > 0) {
-      if (!this.state.selectedOutputId || !outDevices.some((d) => d.id === this.state.selectedOutputId)) {
+      if (
+        this.state.selectedOutputId !== 'none' &&
+        (!this.state.selectedOutputId || !outDevices.some((d) => d.id === this.state.selectedOutputId))
+      ) {
         this.selectOutput(outDevices[0].id);
       }
     } else {
@@ -158,6 +161,14 @@ class MidiEngine {
 
   public selectOutput(outputId: string) {
     if (!this.midiAccess) return;
+
+    if (outputId === 'none') {
+      this.selectedOutput = null;
+      this.state.selectedOutputId = 'none';
+      this.addLog('MIDI出力ポート選択: [なし]');
+      this.notifyListeners();
+      return;
+    }
 
     const output = this.midiAccess.outputs.get(outputId);
     if (output) {

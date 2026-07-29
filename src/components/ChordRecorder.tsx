@@ -53,7 +53,11 @@ export const ChordRecorder: React.FC<ChordRecorderProps> = ({
 
   // Single chord preview
   const handlePreviewChord = (chord: RecordedChord) => {
-    synthEngine.playChord(chord.midiNotes);
+    const midiOutId = midiEngine.getState().selectedOutputId;
+    const isMidiActive = midiOutId && midiOutId !== 'none';
+    if (!isMidiActive) {
+      synthEngine.playChord(chord.midiNotes);
+    }
     midiEngine.sendChordNoteOn(chord.midiNotes);
     setTimeout(() => {
       synthEngine.stopAllNotes();
