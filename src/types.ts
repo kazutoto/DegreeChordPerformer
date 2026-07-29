@@ -61,6 +61,7 @@ export interface ActiveChord {
   hasFlatModifier?: boolean;
   hasSixthModifier?: boolean;
   hasHalfDimModifier?: boolean;
+  bassDegreeNumber?: number | null;
   inversion: number; // 0: Root, 1: First, 2: Second, 3: Third
 }
 

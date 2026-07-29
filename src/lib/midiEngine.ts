@@ -19,6 +19,7 @@ class MidiEngine {
   private midiAccess: MIDIAccess | null = null;
   private selectedOutput: MIDIOutput | null = null;
   private midiMessageListeners: ((message: any) => void)[] = [];
+  private recentlySentNotes = new Map<number, number>();
 
   private state: MidiState = {
     isSupported: false,
@@ -111,6 +112,15 @@ class MidiEngine {
   }
 
   private handleMidiMessage(event: any) {
+    const [status, data1, data2] = event.data;
+    const cmd = status >> 4;
+    // Prevent MIDI loopback: ignore Note On messages if we just sent them
+    if (cmd === 9) {
+      const lastSent = this.recentlySentNotes.get(data1);
+      if (lastSent && Date.now() - lastSent < 200) {
+        return;
+      }
+    }
     this.midiMessageListeners.forEach((listener) => listener(event));
   }
 
@@ -203,6 +213,8 @@ class MidiEngine {
 
   public sendNoteOn(midiNote: number, velocity?: number) {
     if (!this.selectedOutput) return;
+
+    this.recentlySentNotes.set(midiNote, Date.now());
 
     const vel = velocity !== undefined ? velocity : this.state.velocity;
     const channelByte = 0x90 | (this.state.channel - 1); // Note On channel

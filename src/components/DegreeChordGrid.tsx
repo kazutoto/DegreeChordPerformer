@@ -22,6 +22,7 @@ interface DegreeChordGridProps {
   scaleType: ScaleType;
   accidentalPref: AccidentalPreference;
   activeDegreeNumber: number | null;
+  activeBassDegree?: number | null;
   hasSeventhModifier: boolean;
   hasNinthModifier: boolean;
   hasSwapModifier?: boolean;
@@ -41,6 +42,7 @@ export const DegreeChordGrid: React.FC<DegreeChordGridProps> = ({
   scaleType,
   accidentalPref,
   activeDegreeNumber,
+  activeBassDegree = null,
   hasSeventhModifier,
   hasNinthModifier,
   hasSwapModifier = false,
@@ -68,6 +70,8 @@ export const DegreeChordGrid: React.FC<DegreeChordGridProps> = ({
     hasHalfDimModifier
   );
 
+  const bassDegreeInfo = activeBassDegree ? degrees.find((d) => d.degreeNumber === activeBassDegree) : null;
+
   const renderDegreeCard = (degree: DegreeInfo) => {
     const isActive = activeDegreeNumber === degree.degreeNumber;
 
@@ -76,6 +80,13 @@ export const DegreeChordGrid: React.FC<DegreeChordGridProps> = ({
       currentDisplayChord = degree.ninthChordName;
     } else if (hasSeventhModifier || hasM7Modifier || hasSixthModifier || hasHalfDimModifier) {
       currentDisplayChord = degree.seventhChordName;
+    }
+
+    let currentRoman = degree.romanNumeral;
+    if (activeBassDegree && activeBassDegree >= 1 && activeBassDegree <= 7 && activeBassDegree !== degree.degreeNumber && bassDegreeInfo) {
+      currentDisplayChord = `${currentDisplayChord}/${bassDegreeInfo.rootNote}`;
+      const cleanBassRoman = bassDegreeInfo.romanNumeral.replace(/°|ø|\+/g, '').toUpperCase();
+      currentRoman = `${degree.romanNumeral}/${cleanBassRoman}`;
     }
 
     const chordLen = currentDisplayChord.length;
@@ -116,7 +127,7 @@ export const DegreeChordGrid: React.FC<DegreeChordGridProps> = ({
                 : 'bg-slate-900/80 text-indigo-400 border border-slate-700'
             }`}
           >
-            {degree.romanNumeral}
+            {currentRoman}
           </span>
 
           <span

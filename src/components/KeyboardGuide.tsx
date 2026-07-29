@@ -206,9 +206,13 @@ export const KeyboardGuide: React.FC = () => {
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-400 mt-2 text-center">
-            ※ テンキーの <code className="text-indigo-300 font-mono">1</code> 〜 <code className="text-indigo-300 font-mono">7</code> またはキーボード上部の数字キー <code className="text-indigo-300 font-mono">1</code> 〜 <code className="text-indigo-300 font-mono">7</code> に対応しています。
-          </p>
+          <div className="mt-3 p-2 bg-indigo-950/50 border border-indigo-500/30 rounded-lg text-center">
+            <p className="text-[11px] text-indigo-200 font-medium">
+              💡 <span className="font-bold text-amber-300">分数コード ( Slash Chords ) の操作:</span>
+              <br />
+              キーボード上部フルキーの <code className="text-teal-300 font-mono">1</code>〜<code className="text-teal-300 font-mono">7</code>（ベース音）と、テンキーの <code className="text-indigo-300 font-mono">1</code>〜<code className="text-indigo-300 font-mono">7</code>（コード）を組み合わせて演奏できます！
+            </p>
+          </div>
         </div>
       </div>
     </div>
