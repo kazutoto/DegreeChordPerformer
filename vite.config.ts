@@ -20,6 +20,7 @@ import {defineConfig, UserConfig} from 'vite';
 
 export default defineConfig((): UserConfig => {
   return {
+    base: process.env.GITHUB_PAGES === 'true' ? '/DegreeChordPerformer/' : '/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
