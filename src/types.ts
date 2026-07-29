@@ -61,8 +61,8 @@ export interface ActiveChord {
   hasFlatModifier?: boolean;
   hasSixthModifier?: boolean;
   hasHalfDimModifier?: boolean;
-  bassDegreeNumber?: number | null;
   inversion: number; // 0: Root, 1: First, 2: Second, 3: Third
+  slashBassDegree?: number | null; // Fractional chord bass note degree
 }
 
 export interface RecordedChord {
@@ -82,12 +82,22 @@ export interface MidiOutputDevice {
   state: string;
 }
 
+export interface MidiInputDevice {
+  id: string;
+  name: string;
+  manufacturer: string;
+  state: string;
+}
+
 export interface MidiState {
   isSupported: boolean;
   isEnabled: boolean;
   outputs: MidiOutputDevice[];
+  inputs: MidiInputDevice[];
   selectedOutputId: string | null;
-  channel: number; // 1-16
+  selectedInputId: string | 'all' | 'none';
+  outputChannel: number; // 1-16
+  inputChannel: number | 'all'; // 1-16 or 'all'
   velocity: number; // 1-127
   log: string[];
   error: string | null;

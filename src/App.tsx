@@ -60,7 +60,6 @@ export default function App() {
   const [hasFlatModifier, setHasFlatModifier] = useState<boolean>(false);
   const [hasSixthModifier, setHasSixthModifier] = useState<boolean>(false);
   const [hasHalfDimModifier, setHasHalfDimModifier] = useState<boolean>(false);
-  const [activeBassDegree, setActiveBassDegree] = useState<number | null>(null);
   const [isStrumEnabled, setIsStrumEnabled] = useState<boolean>(false);
   const [inversion, setInversion] = useState<number>(0);
   const [sustainActive, setSustainActive] = useState<boolean>(false);
@@ -68,6 +67,7 @@ export default function App() {
   // Active playing chord state
   const [activeDegreeNumber, setActiveDegreeNumber] = useState<number | null>(null);
   const [activeChord, setActiveChord] = useState<ActiveChord | null>(null);
+  const [slashBassDegree, setSlashBassDegree] = useState<number | null>(null);
 
   // Recording State
   const [isRecording, setIsRecording] = useState<boolean>(true);
@@ -116,13 +116,11 @@ export default function App() {
     hasSus4Modifier,
     hasM7Modifier,
     hasFlatModifier,
-    hasSixthModifier,
-    hasHalfDimModifier,
-    activeBassDegree,
     isStrumEnabled,
     inversion,
     sustainActive,
     activeDegreeNumber,
+    slashBassDegree,
     isRecording,
   });
 
@@ -143,11 +141,11 @@ export default function App() {
       hasFlatModifier,
       hasSixthModifier,
       hasHalfDimModifier,
-      activeBassDegree,
       isStrumEnabled,
       inversion,
       sustainActive,
       activeDegreeNumber,
+      slashBassDegree,
       isRecording,
     };
   }, [
@@ -166,11 +164,11 @@ export default function App() {
     hasFlatModifier,
     hasSixthModifier,
     hasHalfDimModifier,
-    activeBassDegree,
     isStrumEnabled,
     inversion,
     sustainActive,
     activeDegreeNumber,
+    slashBassDegree,
     isRecording,
   ]);
 
@@ -188,8 +186,7 @@ export default function App() {
       overrideFlat?: boolean,
       overrideSixth?: boolean,
       overrideHalfDim?: boolean,
-      velocity?: number,
-      customBassDegree?: number | null
+      velocity?: number
     ) => {
       const s = stateRef.current;
 
@@ -203,7 +200,6 @@ export default function App() {
       const useFlat = overrideFlat !== undefined ? overrideFlat : s.hasFlatModifier;
       const useSixth = overrideSixth !== undefined ? overrideSixth : s.hasSixthModifier;
       const useHalfDim = overrideHalfDim !== undefined ? overrideHalfDim : s.hasHalfDimModifier;
-      const useBassDegree = customBassDegree !== undefined ? customBassDegree : s.activeBassDegree;
       
       const playVelocity = velocity !== undefined ? velocity : midiEngine.getState().velocity;
 
@@ -225,7 +221,7 @@ export default function App() {
         useFlat,
         useSixth,
         useHalfDim,
-        useBassDegree
+        s.slashBassDegree
       );
 
       setActiveDegreeNumber(degreeNum);
@@ -535,47 +531,32 @@ export default function App() {
         return;
       }
 
-      // Bass Degree keys (Full keyboard Digit 1-7) & Chord Degree keys (Numpad 1-7)
-      let isTopRowDigit = false;
-      let topRowVal: number | null = null;
-
+      // Slash chord bass (Top-row 1-7)
       if (code.startsWith('Digit') && code !== 'Digit0') {
         const num = parseInt(code.replace('Digit', ''), 10);
         if (num >= 1 && num <= 7) {
-          isTopRowDigit = true;
-          topRowVal = num;
+          e.preventDefault();
+          setSlashBassDegree(num);
+          stateRef.current.slashBassDegree = num; // Synchronous update
+          // If a chord is already playing, update it immediately with the new bass note
+          if (stateRef.current.activeDegreeNumber !== null) {
+            triggerPlayDegree(stateRef.current.activeDegreeNumber);
+          }
+          return;
         }
-      } else if (!code.startsWith('Numpad') && ['1', '2', '3', '4', '5', '6', '7'].includes(key) && e.location !== 3) {
-        isTopRowDigit = true;
-        topRowVal = parseInt(key, 10);
       }
 
-      if (isTopRowDigit && topRowVal !== null) {
-        e.preventDefault();
-        setActiveBassDegree(topRowVal);
-        stateRef.current.activeBassDegree = topRowVal;
-        activeKeysSet.add(`Digit_${topRowVal}`);
-        return;
-      }
-
-      let isNumpadDigit = false;
-      let numpadVal: number | null = null;
+      // Degree keys: Numpad 1-7
+      let degreeToPlay: number | null = null;
 
       if (code.startsWith('Numpad') && code !== 'Numpad0') {
         const num = parseInt(code.replace('Numpad', ''), 10);
-        if (num >= 1 && num <= 7) {
-          isNumpadDigit = true;
-          numpadVal = num;
-        }
-      } else if (['1', '2', '3', '4', '5', '6', '7'].includes(key) && e.location === 3) {
-        isNumpadDigit = true;
-        numpadVal = parseInt(key, 10);
+        if (num >= 1 && num <= 7) degreeToPlay = num;
       }
 
-      if (isNumpadDigit && numpadVal !== null) {
+      if (degreeToPlay !== null) {
         e.preventDefault();
-        triggerPlayDegree(numpadVal);
-        return;
+        triggerPlayDegree(degreeToPlay);
       }
     };
 
@@ -765,38 +746,30 @@ export default function App() {
 
       // We no longer handle Space keyup for sustain because it's a toggle now
 
-      // Bass Degree key release (Top-row Digit 1-7)
-      let isTopRowDigitUp = false;
-      let topRowValUp: number | null = null;
-
+      // Slash bass release
       if (code.startsWith('Digit') && code !== 'Digit0') {
         const num = parseInt(code.replace('Digit', ''), 10);
         if (num >= 1 && num <= 7) {
-          isTopRowDigitUp = true;
-          topRowValUp = num;
+          if (stateRef.current.slashBassDegree === num) {
+            setSlashBassDegree(null);
+            stateRef.current.slashBassDegree = null; // Synchronous update
+            // If chord is playing, update it
+            if (stateRef.current.activeDegreeNumber !== null) {
+              triggerPlayDegree(stateRef.current.activeDegreeNumber);
+            }
+          }
         }
-      } else if (!code.startsWith('Numpad') && ['1', '2', '3', '4', '5', '6', '7'].includes(key) && e.location !== 3) {
-        isTopRowDigitUp = true;
-        topRowValUp = parseInt(key, 10);
-      }
-
-      if (isTopRowDigitUp && topRowValUp !== null) {
-        setActiveBassDegree(null);
-        stateRef.current.activeBassDegree = null;
-        activeKeysSet.delete(`Digit_${topRowValUp}`);
         return;
       }
 
-      // Chord Degree key release (Numpad 1-7)
-      let numpadReleased: number | null = null;
-      if (code.startsWith('Numpad') && code !== 'Numpad0') {
+      // Degree key release (Numpad)
+      let degreeReleased: number | null = null;
+      if (code.startsWith('Numpad')) {
         const num = parseInt(code.replace('Numpad', ''), 10);
-        if (num >= 1 && num <= 7) numpadReleased = num;
-      } else if (['1', '2', '3', '4', '5', '6', '7'].includes(key) && e.location === 3) {
-        numpadReleased = parseInt(key, 10);
+        if (num >= 1 && num <= 7) degreeReleased = num;
       }
 
-      if (numpadReleased !== null && stateRef.current.activeDegreeNumber === numpadReleased) {
+      if (degreeReleased !== null && stateRef.current.activeDegreeNumber === degreeReleased) {
         triggerStopChord();
       }
     };
@@ -1006,7 +979,6 @@ export default function App() {
               scaleType={scaleType}
               accidentalPref={accidentalPref}
               activeDegreeNumber={activeDegreeNumber}
-              activeBassDegree={activeBassDegree}
               hasSeventhModifier={hasSeventhModifier}
               hasNinthModifier={hasNinthModifier}
               hasSwapModifier={hasSwapModifier}

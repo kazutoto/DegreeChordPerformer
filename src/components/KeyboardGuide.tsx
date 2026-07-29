@@ -143,7 +143,17 @@ export const KeyboardGuide: React.FC = () => {
         <div className="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80">
           <div className="flex items-center gap-2 text-xs font-bold text-indigo-300 mb-2">
             <span className="w-2 h-2 rounded-full bg-indigo-500" />
-            右手: ディグリー入力 (Numpad / 数字キー)
+            右手: 和音 & ベース入力
+          </div>
+          <div className="mb-2 p-2 bg-slate-900 border border-slate-700 rounded-lg text-xs">
+            <div className="flex justify-between items-center mb-1">
+              <span className="font-bold text-indigo-400">フルキー数字 (1〜7):</span>
+              <span className="text-slate-300">分数コードベース音 指定</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="font-bold text-indigo-400">テンキー (1〜7):</span>
+              <span className="text-slate-300">和音発音 (ON/OFF制御)</span>
+            </div>
           </div>
           <div className="grid grid-cols-3 gap-1.5 text-center font-mono text-xs max-w-xs mx-auto">
             {/* Top Row: 7, 8, 9 */}
@@ -206,13 +216,9 @@ export const KeyboardGuide: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-3 p-2 bg-indigo-950/50 border border-indigo-500/30 rounded-lg text-center">
-            <p className="text-[11px] text-indigo-200 font-medium">
-              💡 <span className="font-bold text-amber-300">分数コード ( Slash Chords ) の操作:</span>
-              <br />
-              キーボード上部フルキーの <code className="text-teal-300 font-mono">1</code>〜<code className="text-teal-300 font-mono">7</code>（ベース音）と、テンキーの <code className="text-indigo-300 font-mono">1</code>〜<code className="text-indigo-300 font-mono">7</code>（コード）を組み合わせて演奏できます！
-            </p>
-          </div>
+          <p className="text-[11px] text-slate-400 mt-2 text-center">
+            ※ テンキーの <code className="text-indigo-300 font-mono">1</code> 〜 <code className="text-indigo-300 font-mono">7</code> で和音を発音します。キーボード上部の数字キー <code className="text-indigo-300 font-mono">1</code> 〜 <code className="text-indigo-300 font-mono">7</code> を押しながらテンキーを弾くと分数コードになります。
+          </p>
         </div>
       </div>
     </div>

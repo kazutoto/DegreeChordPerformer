@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { MidiOutputDevice, MidiState } from '../types';
+import { MidiOutputDevice, MidiInputDevice, MidiState } from '../types';
 
 class MidiEngine {
   private midiAccess: MIDIAccess | null = null;
   private selectedOutput: MIDIOutput | null = null;
   private midiMessageListeners: ((message: any) => void)[] = [];
-  private recentlySentNotes = new Map<number, number>();
 
   private state: MidiState = {
     isSupported: false,
     isEnabled: false,
     outputs: [],
+    inputs: [],
     selectedOutputId: null,
-    channel: 1,
+    selectedInputId: 'none',
+    outputChannel: 1,
+    inputChannel: 'all',
     velocity: 100,
     log: [],
     error: null,
@@ -57,10 +59,10 @@ class MidiEngine {
       this.state.isEnabled = true;
       this.state.error = null;
 
-      this.updateOutputList();
+      this.updateDeviceLists();
 
       this.midiAccess.onstatechange = () => {
-        this.updateOutputList();
+        this.updateDeviceLists();
       };
 
       this.addLog('Web MIDI API に接続しました');
@@ -75,52 +77,75 @@ class MidiEngine {
     }
   }
 
-  private updateOutputList() {
+  private updateDeviceLists() {
     if (!this.midiAccess) return;
 
-    // Attach listeners to all inputs
-    const inputs = this.midiAccess.inputs.values();
-    for (const input of inputs) {
-      input.onmidimessage = this.handleMidiMessage;
-    }
-
-    const devices: MidiOutputDevice[] = [];
+    // Output Devices
+    const outDevices: MidiOutputDevice[] = [];
     const outputs = this.midiAccess.outputs.values();
 
     for (const output of outputs) {
-      devices.push({
+      outDevices.push({
         id: output.id,
         name: output.name || `MIDI Out (${output.id})`,
         manufacturer: output.manufacturer || '汎用',
         state: output.state || 'connected',
       });
     }
-
-    this.state.outputs = devices;
+    this.state.outputs = outDevices;
 
     // Auto-select first device if none selected or if previous device lost
-    if (devices.length > 0) {
-      if (!this.state.selectedOutputId || !devices.some((d) => d.id === this.state.selectedOutputId)) {
-        this.selectOutput(devices[0].id);
+    if (outDevices.length > 0) {
+      if (!this.state.selectedOutputId || !outDevices.some((d) => d.id === this.state.selectedOutputId)) {
+        this.selectOutput(outDevices[0].id);
       }
     } else {
       this.selectedOutput = null;
       this.state.selectedOutputId = null;
     }
 
+    // Input Devices
+    const inDevices: MidiInputDevice[] = [];
+    const inputs = this.midiAccess.inputs.values();
+    for (const input of inputs) {
+      input.onmidimessage = this.handleMidiMessage;
+      inDevices.push({
+        id: input.id,
+        name: input.name || `MIDI In (${input.id})`,
+        manufacturer: input.manufacturer || '汎用',
+        state: input.state || 'connected',
+      });
+    }
+    this.state.inputs = inDevices;
+
     this.notifyListeners();
   }
 
   private handleMidiMessage(event: any) {
-    const [status, data1, data2] = event.data;
-    const cmd = status >> 4;
-    // Prevent MIDI loopback: ignore Note On messages if we just sent them
-    if (cmd === 9) {
-      const lastSent = this.recentlySentNotes.get(data1);
-      if (lastSent && Date.now() - lastSent < 200) {
+    if (this.state.selectedInputId === 'none') {
+      return;
+    }
+
+    // Filter by selected input device ID if not 'all'
+    if (this.state.selectedInputId !== 'all') {
+      const inputId = event.target?.id || event.srcElement?.id;
+      if (inputId && inputId !== this.state.selectedInputId) {
         return;
       }
     }
+
+    // Filter by selected input channel if not 'all'
+    if (this.state.inputChannel !== 'all') {
+      const status = event.data[0];
+      // Only filter Channel Voice Messages (0x80 to 0xEF)
+      if (status >= 0x80 && status <= 0xEF) {
+        const channel = (status & 0x0F) + 1;
+        if (channel !== this.state.inputChannel) {
+          return;
+        }
+      }
+    }
+
     this.midiMessageListeners.forEach((listener) => listener(event));
   }
 
@@ -146,8 +171,18 @@ class MidiEngine {
     this.notifyListeners();
   }
 
-  public setChannel(channel: number) {
-    this.state.channel = Math.max(1, Math.min(16, channel));
+  public setOutputChannel(channel: number) {
+    this.state.outputChannel = Math.max(1, Math.min(16, channel));
+    this.notifyListeners();
+  }
+
+  public setInputChannel(channel: number | 'all') {
+    this.state.inputChannel = channel === 'all' ? 'all' : Math.max(1, Math.min(16, channel));
+    this.notifyListeners();
+  }
+
+  public selectInput(inputId: string | 'all' | 'none') {
+    this.state.selectedInputId = inputId;
     this.notifyListeners();
   }
 
@@ -189,13 +224,13 @@ class MidiEngine {
   public sendSustainControl(isSustainOn: boolean) {
     if (!this.selectedOutput) return;
 
-    const channelByte = 0xb0 | (this.state.channel - 1); // Control Change channel
+    const channelByte = 0xb0 | (this.state.outputChannel - 1); // Control Change channel
     const ccNumber = 64; // Sustain pedal (Hold 1)
     const value = isSustainOn ? 127 : 0;
 
     try {
       this.selectedOutput.send([channelByte, ccNumber, value]);
-      this.addLog(`CC#64 (Sustain): Val=${value} Ch=${this.state.channel}`);
+      this.addLog(`CC#64 (Sustain): Val=${value} Ch=${this.state.outputChannel}`);
     } catch (e: unknown) {
       console.error('MIDI CC send error:', e);
     }
@@ -214,15 +249,13 @@ class MidiEngine {
   public sendNoteOn(midiNote: number, velocity?: number) {
     if (!this.selectedOutput) return;
 
-    this.recentlySentNotes.set(midiNote, Date.now());
-
     const vel = velocity !== undefined ? velocity : this.state.velocity;
-    const channelByte = 0x90 | (this.state.channel - 1); // Note On channel
+    const channelByte = 0x90 | (this.state.outputChannel - 1); // Note On channel
 
     try {
       this.selectedOutput.send([channelByte, midiNote, vel]);
       this.activeMidiNotes.add(midiNote);
-      this.addLog(`Note On: Note=${midiNote} Vel=${vel} Ch=${this.state.channel}`);
+      this.addLog(`Note On: Note=${midiNote} Vel=${vel} Ch=${this.state.outputChannel}`);
     } catch (e: unknown) {
       console.error('MIDI Note On send error:', e);
     }
@@ -231,12 +264,12 @@ class MidiEngine {
   public sendNoteOff(midiNote: number) {
     if (!this.selectedOutput) return;
 
-    const channelByte = 0x80 | (this.state.channel - 1); // Note Off channel
+    const channelByte = 0x80 | (this.state.outputChannel - 1); // Note Off channel
 
     try {
       this.selectedOutput.send([channelByte, midiNote, 0]);
       this.activeMidiNotes.delete(midiNote);
-      this.addLog(`Note Off: Note=${midiNote} Ch=${this.state.channel}`);
+      this.addLog(`Note Off: Note=${midiNote} Ch=${this.state.outputChannel}`);
     } catch (e: unknown) {
       console.error('MIDI Note Off send error:', e);
     }

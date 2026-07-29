@@ -83,7 +83,7 @@ export const MidiSettingsModal: React.FC<MidiSettingsModalProps> = ({
             <div className="p-3 bg-emerald-950/40 border border-emerald-500/40 rounded-xl text-emerald-300 flex items-center justify-between gap-2 text-xs">
               <span className="flex items-center gap-2 font-semibold">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                Web MIDI 有効: 検出済みポート数 [{midiState.outputs.length}]
+                Web MIDI 有効: 検出済みポート数 [Out: {midiState.outputs.length} / In: {midiState.inputs.length}]
               </span>
               <button
                 onClick={() => midiEngine.initMidi()}
@@ -96,9 +96,28 @@ export const MidiSettingsModal: React.FC<MidiSettingsModalProps> = ({
             </div>
           )}
 
-          {/* MIDI Port Selector */}
+          {/* MIDI Input Port Selector */}
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-300">MIDI 出力デバイス / 仮想MIDIポート</label>
+            <label className="text-xs font-bold text-slate-300">MIDI 入力デバイス (Input)</label>
+            <select
+              disabled={!midiState.isEnabled}
+              value={midiState.selectedInputId || 'none'}
+              onChange={(e) => midiEngine.selectInput(e.target.value)}
+              className="w-full bg-slate-800 border border-slate-700 text-slate-100 font-bold text-sm rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none cursor-pointer disabled:opacity-50"
+            >
+              <option value="none">入力デバイスなし (None)</option>
+              <option value="all">すべての入力デバイス (All Inputs)</option>
+              {midiState.inputs.map((dev) => (
+                <option key={dev.id} value={dev.id}>
+                  {dev.name} ({dev.manufacturer})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* MIDI Output Port Selector */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-300">MIDI 出力デバイス / 仮想MIDIポート (Output)</label>
             <select
               disabled={!midiState.isEnabled || midiState.outputs.length === 0}
               value={midiState.selectedOutputId || ''}
@@ -120,18 +139,19 @@ export const MidiSettingsModal: React.FC<MidiSettingsModalProps> = ({
             </p>
           </div>
 
-          {/* Channel & Velocity */}
+          {/* Channels Selection */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-300">
-                MIDI チャンネル (Channel: {midiState.channel})
+                入力チャンネル (Input Ch: {midiState.inputChannel})
               </label>
               <select
                 disabled={!midiState.isEnabled}
-                value={midiState.channel}
-                onChange={(e) => midiEngine.setChannel(parseInt(e.target.value))}
+                value={midiState.inputChannel}
+                onChange={(e) => midiEngine.setInputChannel(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
                 className="w-full bg-slate-800 border border-slate-700 text-slate-100 font-bold text-xs rounded-xl px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none cursor-pointer disabled:opacity-50"
               >
+                <option value="all">すべてのチャンネル</option>
                 {Array.from({ length: 16 }, (_, i) => i + 1).map((ch) => (
                   <option key={ch} value={ch}>
                     チャンネル {ch}
@@ -142,17 +162,36 @@ export const MidiSettingsModal: React.FC<MidiSettingsModalProps> = ({
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-300">
-                ベロシティ (Velocity: {midiState.velocity})
+                出力チャンネル (Output Ch: {midiState.outputChannel})
               </label>
-              <input
-                type="range"
-                min="1"
-                max="127"
-                value={midiState.velocity}
-                onChange={(e) => midiEngine.setVelocity(parseInt(e.target.value))}
-                className="w-full accent-emerald-500 bg-slate-700 h-2 rounded-lg cursor-pointer mt-2"
-              />
+              <select
+                disabled={!midiState.isEnabled}
+                value={midiState.outputChannel}
+                onChange={(e) => midiEngine.setOutputChannel(parseInt(e.target.value))}
+                className="w-full bg-slate-800 border border-slate-700 text-slate-100 font-bold text-xs rounded-xl px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none cursor-pointer disabled:opacity-50"
+              >
+                {Array.from({ length: 16 }, (_, i) => i + 1).map((ch) => (
+                  <option key={ch} value={ch}>
+                    チャンネル {ch}
+                  </option>
+                ))}
+              </select>
             </div>
+          </div>
+
+          {/* Velocity Settings */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-300">
+              ベロシティ (Velocity: {midiState.velocity})
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="127"
+              value={midiState.velocity}
+              onChange={(e) => midiEngine.setVelocity(parseInt(e.target.value))}
+              className="w-full accent-emerald-500 bg-slate-700 h-2 rounded-lg cursor-pointer mt-2"
+            />
           </div>
 
           {/* Live MIDI Log Console */}

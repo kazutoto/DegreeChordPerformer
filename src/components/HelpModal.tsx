@@ -56,7 +56,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             </h3>
             <ul className="list-disc list-inside space-y-1 bg-slate-800/60 p-3 rounded-xl border border-slate-700/80">
               <li>
-                <strong className="text-white">右手操作 (テンキー 1〜7 / フルキー 1〜7):</strong> テンキー(1〜7)でディグリーコード (1度〜7度) を発音します。キーボード上部フルキーの数字(1〜7)を押しながらテンキーを押すと、ベース音を指定した分数コード (オンコード / オンベース) として演奏されます。
+                <strong className="text-white">右手操作 (テンキー / 数字キー 1〜7):</strong> 指定されたキーのディグリーコード (1度〜7度) を発音します。
               </li>
               <li>
                 <strong className="text-white">左手修飾キー Z (9thコード):</strong> <code className="text-purple-300 font-mono">Z</code> キーを押しながらテンキーを押すと、9thコード (maj9, m9, 9など) に拡張されます。
@@ -95,7 +95,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                 <strong className="text-white">E キー (展開形):</strong> コードの転回形 (Root, 1st Inv, 2nd Inv, 3rd Inv) を切り替えます。
               </li>
               <li>
-                <strong className="text-white">キー移調 (テンキー + / - / * / /):</strong> テンキーなどの <code className="text-amber-300 font-mono">+</code> で主音キーを半音上げ、<code className="text-amber-300 font-mono">-</code> で半音下げます。<code className="text-amber-300 font-mono">*</code> で +5 半音、<code className="text-amber-300 font-mono">/</code> で -5 半音移調します。
+                <strong className="text-white">テンキー + / - キー (キー移調):</strong> テンキーなどの <code className="text-amber-300 font-mono">+</code> で主音キーを半音上げ、<code className="text-amber-300 font-mono">-</code> で半音下げます。
               </li>
               <li>
                 <strong className="text-white">Space キー (サステイン):</strong> 音を伸ばすサステインペダルとして機能します。

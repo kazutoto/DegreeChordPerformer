@@ -403,7 +403,7 @@ export function constructChordMidiNotes(
   hasFlatModifier: boolean = false,
   hasSixthModifier: boolean = false,
   hasHalfDimModifier: boolean = false,
-  customBassDegree?: number | null
+  slashBassDegree: number | null = null
 ): ActiveChord {
   const baseRootPitch = noteToPitchClass(keyRoot);
   let rootPitch = baseRootPitch;
@@ -503,8 +503,26 @@ export function constructChordMidiNotes(
     voicedNotes.push(lowestNote + 12);
   }
 
-  // Ensure notes are sorted
-  voicedNotes.sort((a, b) => a - b);
+  // Handle Slash Chord (Fractional Chord)
+  if (slashBassDegree !== null) {
+    const slashIdx = (slashBassDegree - 1) % 7;
+    const slashRootIntervalFromKey = scaleIntervals[slashIdx];
+    // Place it one octave below the base octave to serve as bass
+    const slashBassMidi = 12 * baseOctave + baseRootPitch + midiOffset + slashRootIntervalFromKey;
+    // Add to the front if it's not already the lowest note (well, we just force it to be lowest)
+    voicedNotes = [slashBassMidi, ...voicedNotes];
+    
+    // Sort to ensure the new bass note might be the lowest?
+    // Actually, we placed it an octave lower (baseOctave instead of baseOctave + 1). 
+    // Usually chords are built on baseOctave+1.
+    voicedNotes.sort((a, b) => a - b);
+  } else {
+    // Ensure notes are sorted
+    voicedNotes.sort((a, b) => a - b);
+  }
+
+  // Get note names for UI
+  const noteNames = voicedNotes.map((m) => midiToNoteName(m, accidentalPref));
 
   // Determine chord name & roman numeral
   const degInfos = getDegreesForScale(keyRoot, scaleType, accidentalPref, hasSwapModifier, hasDimModifier, hasSus4Modifier, hasM7Modifier, hasAugModifier, hasFlatModifier, hasSixthModifier, hasHalfDimModifier);
@@ -517,41 +535,18 @@ export function constructChordMidiNotes(
     displayChordName = degInfo.seventhChordName;
   }
 
-  let displayDegreeRoman = degInfo.romanNumeral;
-
-  // Custom Bass Degree (Slash chord)
-  if (customBassDegree && customBassDegree >= 1 && customBassDegree <= 7) {
-    const bassIdx = (customBassDegree - 1) % 7;
-    const bassIntervalFromKey = scaleIntervals[bassIdx];
-    let bassMidi = 12 * (baseOctave + 1) + baseRootPitch + midiOffset + bassIntervalFromKey;
-    while (bassMidi >= voicedNotes[0]) {
-      bassMidi -= 12;
-    }
-    while (bassMidi < 24) {
-      bassMidi += 12;
-    }
-    voicedNotes.unshift(bassMidi);
-
-    const bassPitchClass = scalePitches[bassIdx];
-    const bassNoteName = pitchClassToNoteName(bassPitchClass, accidentalPref);
-
-    if (customBassDegree !== degreeNumber) {
-      displayChordName = `${displayChordName}/${bassNoteName}`;
-      const bassRoman = getRomanNumeral(customBassDegree, 'maj');
-      displayDegreeRoman = `${degInfo.romanNumeral}/${bassRoman}`;
-    }
+  // Add inversion suffix to chord name if applicable
+  if (slashBassDegree !== null) {
+    const bassNote = noteNames[0];
+    displayChordName = `${displayChordName}/${bassNote}`;
   } else if (actualInversion > 0) {
-    // Add inversion suffix to chord name if applicable
-    const bassNote = pitchClassToNoteName(voicedNotes[0] % 12, accidentalPref);
+    const bassNote = noteNames[0];
     displayChordName = `${displayChordName}/${bassNote}`;
   }
 
-  // Get note names for UI
-  const noteNames = voicedNotes.map((m) => midiToNoteName(m, accidentalPref));
-
   return {
     degreeNumber,
-    degreeRoman: displayDegreeRoman,
+    degreeRoman: degInfo.romanNumeral,
     chordName: displayChordName,
     notes: noteNames,
     midiNotes: voicedNotes,
@@ -565,7 +560,7 @@ export function constructChordMidiNotes(
     hasFlatModifier,
     hasSixthModifier,
     hasHalfDimModifier,
-    bassDegreeNumber: customBassDegree,
     inversion: actualInversion,
+    slashBassDegree,
   };
 }
