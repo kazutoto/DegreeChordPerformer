@@ -32,6 +32,7 @@ interface DegreeChordGridProps {
   hasFlatModifier?: boolean;
   hasSixthModifier?: boolean;
   hasHalfDimModifier?: boolean;
+  slashBassDegree?: number | null;
   onPlayDegreeStart: (degreeNumber: number) => void;
   onPlayDegreeEnd: () => void;
 }
@@ -51,6 +52,7 @@ export const DegreeChordGrid: React.FC<DegreeChordGridProps> = ({
   hasFlatModifier = false,
   hasSixthModifier = false,
   hasHalfDimModifier = false,
+  slashBassDegree = null,
   onPlayDegreeStart,
   onPlayDegreeEnd,
 }) => {
@@ -68,6 +70,10 @@ export const DegreeChordGrid: React.FC<DegreeChordGridProps> = ({
     hasHalfDimModifier
   );
 
+  // Map degrees by number for numpad layout
+  const degMap = new Map<number, DegreeInfo>();
+  degrees.forEach((d) => degMap.set(d.degreeNumber, d));
+
   const renderDegreeCard = (degree: DegreeInfo) => {
     const isActive = activeDegreeNumber === degree.degreeNumber;
 
@@ -76,6 +82,13 @@ export const DegreeChordGrid: React.FC<DegreeChordGridProps> = ({
       currentDisplayChord = degree.ninthChordName;
     } else if (hasSeventhModifier || hasM7Modifier || hasSixthModifier || hasHalfDimModifier) {
       currentDisplayChord = degree.seventhChordName;
+    }
+
+    if (slashBassDegree !== null) {
+      const bassDegreeInfo = degMap.get(slashBassDegree);
+      if (bassDegreeInfo) {
+        currentDisplayChord = `${currentDisplayChord}/${bassDegreeInfo.rootNote}`;
+      }
     }
 
     const chordLen = currentDisplayChord.length;
@@ -189,10 +202,6 @@ export const DegreeChordGrid: React.FC<DegreeChordGridProps> = ({
       </div>
     </div>
   );
-
-  // Map degrees by number for numpad layout
-  const degMap = new Map<number, DegreeInfo>();
-  degrees.forEach((d) => degMap.set(d.degreeNumber, d));
 
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl">

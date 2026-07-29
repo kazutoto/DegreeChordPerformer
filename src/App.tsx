@@ -989,6 +989,7 @@ export default function App() {
               hasFlatModifier={hasFlatModifier}
               hasSixthModifier={hasSixthModifier}
               hasHalfDimModifier={hasHalfDimModifier}
+              slashBassDegree={slashBassDegree}
               onPlayDegreeStart={(degNum) => triggerPlayDegree(degNum)}
               onPlayDegreeEnd={() => triggerStopChord()}
             />
