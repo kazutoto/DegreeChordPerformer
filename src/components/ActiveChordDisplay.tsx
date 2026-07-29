@@ -123,7 +123,7 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <span className="text-[10px] font-mono text-slate-200 bg-black/30 px-1 rounded mb-0.5">[Shift / 0]</span>
+                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasSwapModifier ? 'bg-black/30 text-slate-100' : 'bg-emerald-600 text-white'}`}>[Shift / 0]</span>
                 <span>{hasSwapModifier ? 'Maj ⇄ Min' : 'OFF'}</span>
               </button>
 
@@ -135,7 +135,7 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400'
                 }`}
               >
-                <span className="text-[10px] font-mono text-slate-200 bg-black/30 px-1 rounded mb-0.5">[Ctrl]</span>
+                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasFlatModifier ? 'bg-black/30 text-slate-100' : 'bg-pink-600 text-white'}`}>[Ctrl]</span>
                 <span>♭ (Flat) {hasFlatModifier ? 'ON' : 'OFF'}</span>
               </div>
             </div>
@@ -151,7 +151,7 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <span className="text-[10px] font-mono text-slate-200 bg-black/30 px-1 rounded mb-0.5">[A]</span>
+                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasAugModifier ? 'bg-black/30 text-slate-100' : 'bg-orange-600 text-white'}`}>[A]</span>
                 <span>aug {hasAugModifier ? 'ON' : 'OFF'}</span>
               </button>
 
@@ -164,7 +164,7 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <span className="text-[10px] font-mono text-slate-200 bg-black/30 px-1 rounded mb-0.5">[S]</span>
+                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasSus4Modifier ? 'bg-black/30 text-slate-100' : 'bg-amber-600 text-white'}`}>[S]</span>
                 <span>sus4 {hasSus4Modifier ? 'ON' : 'OFF'}</span>
               </button>
 
@@ -177,7 +177,7 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <span className="text-[10px] font-mono text-slate-200 bg-black/30 px-1 rounded mb-0.5">[D]</span>
+                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasDimModifier ? 'bg-black/30 text-slate-100' : 'bg-rose-600 text-white'}`}>[D]</span>
                 <span>dim {hasDimModifier ? 'ON' : 'OFF'}</span>
               </button>
 
@@ -186,11 +186,11 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                 onClick={onToggleHalfDim}
                 className={`flex flex-col items-center justify-center p-2 rounded-lg text-xs font-bold border transition-all ${
                   hasHalfDimModifier
-                    ? 'bg-pink-600 border-pink-400 text-white shadow'
+                    ? 'bg-yellow-500 border-yellow-300 text-white shadow'
                     : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <span className="text-[10px] font-mono text-slate-200 bg-black/30 px-1 rounded mb-0.5">[F]</span>
+                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasHalfDimModifier ? 'bg-black/30 text-slate-100' : 'bg-yellow-500 text-white'}`}>[F]</span>
                 <span>m7(♭5) {hasHalfDimModifier ? 'ON' : 'OFF'}</span>
               </button>
             </div>
@@ -206,7 +206,7 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <span className="text-[10px] font-mono text-slate-200 bg-black/30 px-1 rounded mb-0.5">[Z]</span>
+                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasNinthModifier ? 'bg-black/30 text-slate-100' : 'bg-purple-600 text-white'}`}>[Z]</span>
                 <span>9th {hasNinthModifier ? 'ON' : 'OFF'}</span>
               </button>
 
@@ -219,7 +219,7 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <span className="text-[10px] font-mono text-slate-200 bg-black/30 px-1 rounded mb-0.5">[X]</span>
+                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasSeventhModifier ? 'bg-black/30 text-slate-100' : 'bg-indigo-600 text-white'}`}>[X]</span>
                 <span>7th {hasSeventhModifier ? 'ON' : 'OFF'}</span>
               </button>
 
@@ -232,7 +232,7 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <span className="text-[10px] font-mono text-slate-200 bg-black/30 px-1 rounded mb-0.5">[C]</span>
+                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasM7Modifier ? 'bg-black/30 text-slate-100' : 'bg-sky-600 text-white'}`}>[C]</span>
                 <span>M7 {hasM7Modifier ? 'ON' : 'OFF'}</span>
               </button>
 
@@ -245,7 +245,7 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <span className="text-[10px] font-mono text-slate-200 bg-black/30 px-1 rounded mb-0.5">[V]</span>
+                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasSixthModifier ? 'bg-black/30 text-slate-100' : 'bg-blue-600 text-white'}`}>[V]</span>
                 <span>6th {hasSixthModifier ? 'ON' : 'OFF'}</span>
               </button>
             </div>

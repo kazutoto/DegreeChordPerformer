@@ -94,9 +94,9 @@ export const KeyboardGuide: React.FC = () => {
                 </div>
               </div>
               <div className="bg-slate-900 border border-slate-700 rounded-lg p-1.5 flex flex-col items-center text-center gap-1">
-                <kbd className="px-2 py-0.5 bg-pink-600 text-white rounded font-bold text-[10px]">F</kbd>
+                <kbd className="px-2 py-0.5 bg-yellow-500 text-white rounded font-bold text-[10px]">F</kbd>
                 <div>
-                  <div className="text-pink-300 font-bold leading-tight whitespace-nowrap scale-90">m7(♭5)</div>
+                  <div className="text-yellow-400 font-bold leading-tight whitespace-nowrap scale-90">m7(♭5)</div>
                 </div>
               </div>
             </div>
@@ -189,12 +189,19 @@ export const KeyboardGuide: React.FC = () => {
             </div>
           </div>
           
-          <div className="flex justify-center mt-3">
-            <div className="bg-slate-900 border border-slate-700 rounded-lg p-2 flex items-center gap-2 min-w-[120px]">
+          <div className="flex flex-col gap-2 mt-3 items-center">
+            <div className="bg-slate-900 border border-slate-700 rounded-lg p-2 flex items-center gap-2 min-w-[140px] justify-center">
               <kbd className="px-1.5 py-1 bg-slate-700 text-slate-200 rounded font-bold text-xs">+ / -</kbd>
               <div>
                 <div className="text-slate-200 font-bold">キー移調</div>
                 <div className="text-[10px] text-slate-400">半音上げ / 下げ</div>
+              </div>
+            </div>
+            <div className="bg-slate-900 border border-slate-700 rounded-lg p-2 flex items-center gap-2 min-w-[140px] justify-center">
+              <kbd className="px-1.5 py-1 bg-slate-700 text-slate-200 rounded font-bold text-xs">* / /</kbd>
+              <div>
+                <div className="text-slate-200 font-bold">キー移調</div>
+                <div className="text-[10px] text-slate-400">+5 / -5 半音</div>
               </div>
             </div>
           </div>

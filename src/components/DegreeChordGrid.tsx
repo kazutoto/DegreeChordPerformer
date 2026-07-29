@@ -147,7 +147,7 @@ export const DegreeChordGrid: React.FC<DegreeChordGridProps> = ({
                 : hasDimModifier
                 ? 'text-rose-300'
                 : hasHalfDimModifier
-                ? 'text-pink-300'
+                ? 'text-yellow-400'
                 : hasSixthModifier
                 ? 'text-blue-300'
                 : hasSwapModifier

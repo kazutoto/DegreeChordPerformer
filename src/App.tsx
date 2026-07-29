@@ -506,6 +506,16 @@ export default function App() {
         return;
       }
 
+      // Handle * / / keys (Numpad or Keyboard) for Key 5 Semitones Down/Up
+      if (code === 'NumpadMultiply' || key === '*') {
+        setSelectedKey((prev) => transposeKey(prev, 5, stateRef.current.accidentalPref));
+        return;
+      }
+      if (code === 'NumpadDivide' || key === '/') {
+        setSelectedKey((prev) => transposeKey(prev, -5, stateRef.current.accidentalPref));
+        return;
+      }
+
       // Handle Space for Sustain (CC#64)
       if (code === 'Space') {
         e.preventDefault();
