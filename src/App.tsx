@@ -121,11 +121,13 @@ export default function App() {
     sustainActive,
     activeDegreeNumber,
     slashBassDegree,
+    activeSlashBassKeys: [] as number[],
     isRecording,
   });
 
   useEffect(() => {
     stateRef.current = {
+      ...stateRef.current,
       selectedKey,
       scaleType,
       accidentalPref,
@@ -284,10 +286,20 @@ export default function App() {
         return;
       }
 
+      // Ignore if Meta (Command) or Alt (Option) is pressed, to allow OS/browser shortcuts
+      if (e.metaKey || e.altKey) {
+        return;
+      }
+
       if (e.repeat) return; // Ignore key repeat to prevent re-triggering audio stutter
 
       const code = e.code;
       const key = e.key;
+
+      if (code === 'Escape') {
+        resetKeys();
+        return;
+      }
 
       if (e.ctrlKey || code === 'ControlLeft' || code === 'ControlRight' || key === 'Control') {
         e.preventDefault(); // Prevent browser shortcuts (like Ctrl+D, Ctrl+S, etc.)
@@ -536,8 +548,12 @@ export default function App() {
         const num = parseInt(code.replace('Digit', ''), 10);
         if (num >= 1 && num <= 7) {
           e.preventDefault();
-          setSlashBassDegree(num);
-          stateRef.current.slashBassDegree = num; // Synchronous update
+          if (!stateRef.current.activeSlashBassKeys.includes(num)) {
+            stateRef.current.activeSlashBassKeys.push(num);
+          }
+          const currentBass = stateRef.current.activeSlashBassKeys[stateRef.current.activeSlashBassKeys.length - 1];
+          setSlashBassDegree(currentBass);
+          stateRef.current.slashBassDegree = currentBass; // Synchronous update
           // If a chord is already playing, update it immediately with the new bass note
           if (stateRef.current.activeDegreeNumber !== null) {
             triggerPlayDegree(stateRef.current.activeDegreeNumber);
@@ -750,9 +766,15 @@ export default function App() {
       if (code.startsWith('Digit') && code !== 'Digit0') {
         const num = parseInt(code.replace('Digit', ''), 10);
         if (num >= 1 && num <= 7) {
-          if (stateRef.current.slashBassDegree === num) {
-            setSlashBassDegree(null);
-            stateRef.current.slashBassDegree = null; // Synchronous update
+          stateRef.current.activeSlashBassKeys = stateRef.current.activeSlashBassKeys.filter((k) => k !== num);
+          const newBass =
+            stateRef.current.activeSlashBassKeys.length > 0
+              ? stateRef.current.activeSlashBassKeys[stateRef.current.activeSlashBassKeys.length - 1]
+              : null;
+              
+          if (stateRef.current.slashBassDegree !== newBass) {
+            setSlashBassDegree(newBass);
+            stateRef.current.slashBassDegree = newBass; // Synchronous update
             // If chord is playing, update it
             if (stateRef.current.activeDegreeNumber !== null) {
               triggerPlayDegree(stateRef.current.activeDegreeNumber);
@@ -774,12 +796,69 @@ export default function App() {
       }
     };
 
+    const resetKeys = () => {
+      setSlashBassDegree(null);
+      stateRef.current.slashBassDegree = null;
+      stateRef.current.activeSlashBassKeys = [];
+      activeKeysSet.clear();
+
+      setHasSeventhModifier(false);
+      stateRef.current.hasSeventhModifier = false;
+      setHasNinthModifier(false);
+      stateRef.current.hasNinthModifier = false;
+      setHasSwapModifier(false);
+      stateRef.current.hasSwapModifier = false;
+      setHasDimModifier(false);
+      stateRef.current.hasDimModifier = false;
+      setHasSus4Modifier(false);
+      stateRef.current.hasSus4Modifier = false;
+      setHasM7Modifier(false);
+      stateRef.current.hasM7Modifier = false;
+      setHasAugModifier(false);
+      stateRef.current.hasAugModifier = false;
+      setHasFlatModifier(false);
+      stateRef.current.hasFlatModifier = false;
+      setHasSixthModifier(false);
+      stateRef.current.hasSixthModifier = false;
+      setHasHalfDimModifier(false);
+      stateRef.current.hasHalfDimModifier = false;
+
+      triggerStopChord();
+    };
+
+    const focusIntervalId = setInterval(() => {
+      if (!document.hasFocus()) {
+        resetKeys();
+      }
+    }, 500);
+
+    // Mouse enter can detect returning from Mission Control (window scales back up under cursor)
+    const handleMouseEnter = () => {
+      resetKeys();
+    };
+
+    // Pointer down can detect user clicking back into the app or changing a setting
+    const handlePointerDown = () => {
+      resetKeys();
+    };
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('blur', resetKeys);
+    window.addEventListener('focus', resetKeys);
+    document.addEventListener('visibilitychange', resetKeys);
+    document.documentElement.addEventListener('mouseenter', handleMouseEnter);
+    document.addEventListener('pointerdown', handlePointerDown);
 
     return () => {
+      clearInterval(focusIntervalId);
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('blur', resetKeys);
+      window.removeEventListener('focus', resetKeys);
+      document.removeEventListener('visibilitychange', resetKeys);
+      document.documentElement.removeEventListener('mouseenter', handleMouseEnter);
+      document.removeEventListener('pointerdown', handlePointerDown);
     };
   }, [triggerPlayDegree, triggerStopChord]);
 
