@@ -107,9 +107,9 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
         {/* Left-Hand Modifiers Controls */}
         <div className="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800/90 space-y-2">
           <div className="space-y-1.5">
-            {/* Row 1: Shift, Ctrl */}
+            {/* Row 1: Ctrl, Alt */}
             <div className="grid grid-cols-4 gap-1.5">
-              {/* Shift Key Swap Modifier */}
+              {/* Ctrl Key Swap Modifier */}
               <button
                 onClick={onToggleSwap}
                 className={`flex flex-col items-center justify-center p-2 rounded-lg text-xs font-bold border transition-all ${
@@ -118,11 +118,11 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasSwapModifier ? 'bg-black/30 text-slate-100' : 'bg-emerald-600 text-white'}`}>[Shift / 0]</span>
+                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasSwapModifier ? 'bg-black/30 text-slate-100' : 'bg-emerald-600 text-white'}`}>[Ctrl / 0]</span>
                 <span>{hasSwapModifier ? 'Maj ⇄ Min' : 'OFF'}</span>
               </button>
 
-              {/* Ctrl Key Flat Modifier */}
+              {/* Alt Key Flat Modifier */}
               <div
                 className={`flex flex-col items-center justify-center p-2 rounded-lg text-xs font-bold border transition-all ${
                   hasFlatModifier
@@ -130,7 +130,7 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400'
                 }`}
               >
-                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasFlatModifier ? 'bg-black/30 text-slate-100' : 'bg-pink-600 text-white'}`}>[Ctrl]</span>
+                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasFlatModifier ? 'bg-black/30 text-slate-100' : 'bg-pink-600 text-white'}`}>[Alt]</span>
                 <span>♭ (Flat) {hasFlatModifier ? 'ON' : 'OFF'}</span>
               </div>
             </div>
@@ -202,7 +202,7 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                 }`}
               >
                 <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasNinthModifier ? 'bg-black/30 text-slate-100' : 'bg-purple-600 text-white'}`}>[Z]</span>
-                <span>9th {hasNinthModifier ? 'ON' : 'OFF'}</span>
+                <span>add9 {hasNinthModifier ? 'ON' : 'OFF'}</span>
               </button>
 
               {/* X Key 7th Modifier */}

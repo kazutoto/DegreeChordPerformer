@@ -27,7 +27,7 @@ export const KeyboardGuide: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Left Hand: Modifiers Shift / Ctrl / A / S / D / Z / X / C / V / W / Q */}
+        {/* Left Hand: Modifiers Ctrl / Alt / A / S / D / Z / X / C / V / W / Q */}
         <div className="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80">
           <div className="flex items-center gap-2 text-xs font-bold text-purple-300 mb-2">
             <span className="w-2 h-2 rounded-full bg-purple-500" />
@@ -38,7 +38,7 @@ export const KeyboardGuide: React.FC = () => {
             <div className="grid grid-cols-2 gap-2">
               <div className="bg-slate-900 border border-slate-700 rounded-lg p-2 flex items-center gap-2">
                 <div className="flex flex-col gap-1">
-                  <kbd className="px-2 py-1 bg-emerald-600 text-white rounded font-bold text-xs text-center">Shift</kbd>
+                  <kbd className="px-2 py-1 bg-emerald-600 text-white rounded font-bold text-xs text-center">Ctrl</kbd>
                   <kbd className="px-2 py-1 bg-emerald-600 text-white rounded font-bold text-xs text-center">0</kbd>
                 </div>
                 <div>
@@ -47,7 +47,7 @@ export const KeyboardGuide: React.FC = () => {
                 </div>
               </div>
               <div className="bg-slate-900 border border-slate-700 rounded-lg p-2 flex items-center gap-2">
-                <kbd className="px-2 py-1 bg-pink-600 text-white rounded font-bold text-xs">Ctrl</kbd>
+                <kbd className="px-2 py-1 bg-pink-600 text-white rounded font-bold text-xs">Alt</kbd>
                 <div>
                   <div className="text-pink-300 font-bold">♭ (Flat)</div>
                   <div className="text-[10px] text-slate-400">半音下げ</div>

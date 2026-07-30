@@ -157,6 +157,8 @@ export default function App() {
     hasSus4Modifier,
     hasM7Modifier,
     hasFlatModifier,
+    hasSixthModifier,
+    hasHalfDimModifier,
     isStrumEnabled,
     inversion,
     sustainActive,
@@ -332,8 +334,8 @@ export default function App() {
         return;
       }
 
-      // Ignore if Meta (Command) or Alt (Option) is pressed, to allow OS/browser shortcuts
-      if (e.metaKey || e.altKey) {
+      // Ignore if Meta (Command) is pressed, to allow OS/browser shortcuts
+      if (e.metaKey) {
         return;
       }
 
@@ -347,11 +349,11 @@ export default function App() {
         return;
       }
 
-      if (e.ctrlKey || code === 'ControlLeft' || code === 'ControlRight' || key === 'Control') {
-        e.preventDefault(); // Prevent browser shortcuts (like Ctrl+D, Ctrl+S, etc.)
+      if (e.altKey || code === 'AltLeft' || code === 'AltRight' || key === 'Alt') {
+        e.preventDefault(); // Prevent browser shortcuts
         if (!stateRef.current.hasFlatModifier) {
           setHasFlatModifier(true);
-          activeKeysSet.add('Ctrl');
+          activeKeysSet.add('Alt');
           if (stateRef.current.activeDegreeNumber !== null) {
             triggerPlayDegree(
               stateRef.current.activeDegreeNumber,
@@ -366,7 +368,7 @@ export default function App() {
             );
           }
         }
-        if (code === 'ControlLeft' || code === 'ControlRight' || key === 'Control') {
+        if (code === 'AltLeft' || code === 'AltRight' || key === 'Alt') {
           return;
         }
       }
@@ -403,26 +405,34 @@ export default function App() {
       }
 
       if (
-        code === 'ShiftLeft' ||
-        code === 'ShiftRight' ||
-        key === 'Shift' ||
+        e.ctrlKey ||
+        code === 'ControlLeft' ||
+        code === 'ControlRight' ||
+        key === 'Control' ||
         code === 'Numpad0' ||
         code === 'Digit0' ||
         key === '0'
       ) {
-        setHasSwapModifier(true);
-        activeKeysSet.add('Swap');
-        // If chord currently sounding, update with Major/Minor Swap
-        if (stateRef.current.activeDegreeNumber !== null) {
-          triggerPlayDegree(
-            stateRef.current.activeDegreeNumber,
-            stateRef.current.hasSeventhModifier,
-            stateRef.current.hasNinthModifier,
-            true,
-            stateRef.current.hasDimModifier
-          );
+        if (code === 'ControlLeft' || code === 'ControlRight' || key === 'Control') {
+          e.preventDefault();
         }
-        return;
+        if (!stateRef.current.hasSwapModifier) {
+          setHasSwapModifier(true);
+          activeKeysSet.add('Swap');
+          // If chord currently sounding, update with Major/Minor Swap
+          if (stateRef.current.activeDegreeNumber !== null) {
+            triggerPlayDegree(
+              stateRef.current.activeDegreeNumber,
+              stateRef.current.hasSeventhModifier,
+              stateRef.current.hasNinthModifier,
+              true,
+              stateRef.current.hasDimModifier
+            );
+          }
+        }
+        if (code === 'ControlLeft' || code === 'ControlRight' || key === 'Control' || code === 'Numpad0' || code === 'Digit0' || key === '0') {
+          return;
+        }
       }
 
       if (code === 'KeyD' || key === 'd' || key === 'D') {
@@ -626,9 +636,9 @@ export default function App() {
       const code = e.code;
       const key = e.key;
 
-      if (code === 'ControlLeft' || code === 'ControlRight' || key === 'Control') {
+      if (code === 'AltLeft' || code === 'AltRight' || key === 'Alt') {
         setHasFlatModifier(false);
-        activeKeysSet.delete('Ctrl');
+        activeKeysSet.delete('Alt');
         if (stateRef.current.activeDegreeNumber !== null) {
           triggerPlayDegree(
             stateRef.current.activeDegreeNumber,
@@ -674,9 +684,9 @@ export default function App() {
       }
 
       if (
-        code === 'ShiftLeft' ||
-        code === 'ShiftRight' ||
-        key === 'Shift' ||
+        code === 'ControlLeft' ||
+        code === 'ControlRight' ||
+        key === 'Control' ||
         code === 'Numpad0' ||
         code === 'Digit0' ||
         key === '0'
@@ -879,22 +889,11 @@ export default function App() {
     }, 500);
 
     // Mouse enter can detect returning from Mission Control (window scales back up under cursor)
-    const handleMouseEnter = () => {
-      resetKeys();
-    };
-
-    // Pointer down can detect user clicking back into the app or changing a setting
-    const handlePointerDown = () => {
-      resetKeys();
-    };
-
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     window.addEventListener('blur', resetKeys);
     window.addEventListener('focus', resetKeys);
     document.addEventListener('visibilitychange', resetKeys);
-    document.documentElement.addEventListener('mouseenter', handleMouseEnter);
-    document.addEventListener('pointerdown', handlePointerDown);
 
     return () => {
       clearInterval(focusIntervalId);
@@ -903,8 +902,6 @@ export default function App() {
       window.removeEventListener('blur', resetKeys);
       window.removeEventListener('focus', resetKeys);
       document.removeEventListener('visibilitychange', resetKeys);
-      document.documentElement.removeEventListener('mouseenter', handleMouseEnter);
-      document.removeEventListener('pointerdown', handlePointerDown);
     };
   }, [triggerPlayDegree, triggerStopChord]);
 

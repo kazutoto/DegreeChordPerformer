@@ -78,9 +78,10 @@ export const DegreeChordGrid: React.FC<DegreeChordGridProps> = ({
     const isActive = activeDegreeNumber === degree.degreeNumber;
 
     let currentDisplayChord = degree.triadChordName;
+    const useSeventh = hasSeventhModifier || hasM7Modifier || hasSixthModifier || hasHalfDimModifier;
     if (hasNinthModifier) {
-      currentDisplayChord = degree.ninthChordName;
-    } else if (hasSeventhModifier || hasM7Modifier || hasSixthModifier || hasHalfDimModifier) {
+      currentDisplayChord = useSeventh ? degree.ninthChordName : degree.add9ChordName;
+    } else if (useSeventh) {
       currentDisplayChord = degree.seventhChordName;
     }
 

@@ -42,6 +42,7 @@ export interface DegreeInfo {
   triadChordName: string;
   seventhChordName: string;
   ninthChordName: string;
+  add9ChordName: string;
   triadQuality: 'maj' | 'min' | 'dim' | 'aug';
 }
 

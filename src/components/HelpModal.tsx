@@ -71,7 +71,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                 <strong className="text-white">左手修飾キー V (6thコード):</strong> <code className="text-blue-300 font-mono">V</code> キーを押しながらテンキーを押すと、メジャーまたはマイナーの三和音に長6度上の音を加えた 6th コードに変化します。
               </li>
               <li>
-                <strong className="text-white">修飾キー Shift / テンキー 0 (スワップ機能):</strong> <code className="text-emerald-300 font-mono">Shift</code> またはテンキーの <code className="text-emerald-300 font-mono">0</code> キーを押しながらテンキー(1〜7)を押すと、メジャーコードとマイナーコードを反転します (例: F ⇄ Fm, Dm ⇄ D)。
+                <strong className="text-white">修飾キー Ctrl / テンキー 0 (スワップ機能):</strong> <code className="text-emerald-300 font-mono">Ctrl</code> またはテンキーの <code className="text-emerald-300 font-mono">0</code> キーを押しながらテンキー(1〜7)を押すと、メジャーコードとマイナーコードを反転します (例: F ⇄ Fm, Dm ⇄ D)。
               </li>
               <li>
                 <strong className="text-white">左手修飾キー D (ディミニッシュコード):</strong> <code className="text-rose-300 font-mono">D</code> キーを押しながらテンキーを押すと、短3度重ねのディミニッシュコード (dim / dim7) に変化します。
@@ -83,7 +83,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                 <strong className="text-white">左手修飾キー S (sus4コード):</strong> <code className="text-amber-300 font-mono">S</code> キーを押しながらテンキーを押すと、第3音が完全4度（sus4）に置き換わったコード (sus4 / 7sus4) に変化します。
               </li>
               <li>
-                <strong className="text-white">左手修飾キー Ctrl (フラット):</strong> <code className="text-pink-300 font-mono">Ctrl</code> キーを押しながらテンキーを押すと、和音全体が半音下がったフラットコードとして演奏されます。
+                <strong className="text-white">左手修飾キー Alt/Option (フラット):</strong> <code className="text-pink-300 font-mono">Alt</code> (Macは <code className="text-pink-300 font-mono">Option</code>) キーを押しながらテンキーを押すと、和音全体が半音下がったフラットコードとして演奏されます。
               </li>
               <li>
                 <strong className="text-white">W キー (Strum / ストローク):</strong> <code className="text-cyan-300 font-mono">W</code> キーでギターのように和音を1音ずつ時間差でジャカジャーンと鳴らす Strum オプションの On/Off を切り替えます。

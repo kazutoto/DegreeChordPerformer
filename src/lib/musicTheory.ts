@@ -262,6 +262,7 @@ export function getDegreesForScale(
     const triadName = formatChordName(degRootPitch, deg3rdPitch, deg5thPitch, null, null, accidentalPref);
     const seventhName = formatChordName(degRootPitch, deg3rdPitch, deg5thPitch, deg7thPitch, null, accidentalPref);
     const ninthName = formatChordName(degRootPitch, deg3rdPitch, deg5thPitch, deg7thPitch, deg9thPitch, accidentalPref);
+    const add9Name = formatChordName(degRootPitch, deg3rdPitch, deg5thPitch, null, deg9thPitch, accidentalPref);
 
     result.push({
       degreeNumber: d,
@@ -272,6 +273,7 @@ export function getDegreesForScale(
       triadChordName: triadName,
       seventhChordName: seventhName,
       ninthChordName: ninthName,
+      add9ChordName: add9Name,
       triadQuality: quality,
     });
   }
@@ -301,20 +303,22 @@ export function formatChordName(
   let isSus4 = thirdInterval === 5;
   let isSus2 = thirdInterval === 2;
 
+  let baseTriad: string = rootStr;
+  if (isDim) baseTriad = `${rootStr}dim`;
+  else if (isAug) baseTriad = `${rootStr}aug`;
+  else if (isMin) baseTriad = `${rootStr}m`;
+  else if (isSus4) baseTriad = `${rootStr}sus4`;
+  else if (isSus2) baseTriad = `${rootStr}sus2`;
+
   if (!seventhP && !ninthP) {
-    if (isDim) return `${rootStr}dim`;
-    if (isAug) return `${rootStr}aug`;
-    if (isMin) return `${rootStr}m`;
-    if (isSus4) return `${rootStr}sus4`;
-    if (isSus2) return `${rootStr}sus2`;
-    return rootStr; // Major
+    return baseTriad;
   }
 
   // With 7th
   const seventhInterval = seventhP !== null ? (seventhP - rootP + 12) % 12 : null;
   const ninthInterval = ninthP !== null ? (ninthP - rootP + 12) % 12 : null;
 
-  let baseChord: string = rootStr;
+  let baseChord: string = baseTriad;
 
   if (seventhInterval !== null) {
     if (isSus4) {
@@ -435,7 +439,7 @@ export function constructChordMidiNotes(
     return 12 * (baseOctave + 1 + octaveOffset) + baseRootPitch + midiOffset + intervalFromKey;
   };
 
-  const useSeventh = hasSeventh || hasNinth || hasM7Modifier || hasSixthModifier || hasHalfDimModifier;
+  const useSeventh = hasSeventh || hasM7Modifier || hasSixthModifier || hasHalfDimModifier;
 
   let thirdMidi = getMidiForScaleOffset(2);
   let fifthMidi = getMidiForScaleOffset(4);
@@ -530,7 +534,7 @@ export function constructChordMidiNotes(
 
   let displayChordName = degInfo.triadChordName;
   if (hasNinth) {
-    displayChordName = degInfo.ninthChordName;
+    displayChordName = useSeventh ? degInfo.ninthChordName : degInfo.add9ChordName;
   } else if (useSeventh) {
     displayChordName = degInfo.seventhChordName;
   }
