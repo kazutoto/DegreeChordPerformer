@@ -85,6 +85,47 @@ export default function App() {
   // MIDI Engine state listener
   const [midiState, setMidiState] = useState<MidiState>(midiEngine.getState());
 
+  const getAutoAccidentalPref = (key: NoteName, scale: ScaleType): AccidentalPreference => {
+    if (key.includes('b')) return 'flat';
+    if (key.includes('#')) return 'sharp';
+    
+    const isMinor = scale.includes('minor') || scale === 'dorian' || scale === 'phrygian';
+    
+    if (isMinor) {
+      if (['D', 'G', 'C', 'F'].includes(key)) return 'flat';
+    } else {
+      if (['F'].includes(key)) return 'flat';
+    }
+    
+    return 'sharp';
+  };
+
+  const handleKeyChange = (newKey: NoteName) => {
+    setSelectedKey(newKey);
+    setAccidentalPref(getAutoAccidentalPref(newKey, scaleType));
+  };
+
+  const handleScaleChange = (newScale: ScaleType) => {
+    setScaleType(newScale);
+
+    const isMinor = newScale.includes('minor') || newScale === 'dorian' || newScale === 'phrygian';
+    const isMajor = newScale === 'major' || newScale === 'lydian' || newScale === 'mixolydian';
+
+    let newKey = selectedKey;
+
+    if (isMajor && (selectedKey === 'D#' || selectedKey === 'G#' || selectedKey === 'A#')) {
+      newKey = selectedKey === 'D#' ? 'Eb' : selectedKey === 'G#' ? 'Ab' : 'Bb';
+    } else if (isMinor && (selectedKey === 'Db' || selectedKey === 'Gb' || selectedKey === 'Ab' || selectedKey === 'A#')) {
+      newKey = selectedKey === 'Db' ? 'C#' : selectedKey === 'Gb' ? 'F#' : selectedKey === 'Ab' ? 'G#' : 'Bb';
+    }
+
+    if (newKey !== selectedKey) {
+      setSelectedKey(newKey);
+    }
+    
+    setAccidentalPref(getAutoAccidentalPref(newKey, newScale));
+  };
+
   useEffect(() => {
     const unsubscribe = midiEngine.subscribe((state) => {
       setMidiState(state);
@@ -1047,9 +1088,9 @@ export default function App() {
             <div className="border-t border-slate-800/80 pt-3">
               <KeyScaleSelector
                 selectedKey={selectedKey}
-                onKeyChange={setSelectedKey}
+                onKeyChange={handleKeyChange}
                 scaleType={scaleType}
-                onScaleChange={setScaleType}
+                onScaleChange={handleScaleChange}
                 accidentalPref={accidentalPref}
                 onAccidentalChange={setAccidentalPref}
                 baseOctave={baseOctave}

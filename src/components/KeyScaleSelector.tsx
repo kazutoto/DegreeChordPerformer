@@ -43,6 +43,19 @@ export const KeyScaleSelector: React.FC<KeyScaleSelectorProps> = ({
   voicingStyle,
   onVoicingChange,
 }) => {
+  const getAvailableKeys = (): NoteName[] => {
+    const isMinor = scaleType.includes('minor') || scaleType === 'dorian' || scaleType === 'phrygian';
+    const isMajor = scaleType === 'major' || scaleType === 'lydian' || scaleType === 'mixolydian';
+
+    return ALL_ROOT_KEYS.filter((k) => {
+      if (isMajor && (k === 'D#' || k === 'G#' || k === 'A#')) return false;
+      if (isMinor && (k === 'Db' || k === 'Gb' || k === 'Ab' || k === 'A#')) return false;
+      return true;
+    });
+  };
+
+  const availableKeys = getAvailableKeys();
+
   return (
     <div className="text-slate-200">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -80,7 +93,7 @@ export const KeyScaleSelector: React.FC<KeyScaleSelectorProps> = ({
               onChange={(e) => onKeyChange(e.target.value as NoteName)}
               className="w-full bg-slate-800 border border-slate-700 text-slate-100 font-bold text-xs sm:text-sm rounded-xl px-2.5 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer appearance-none"
             >
-              {ALL_ROOT_KEYS.map((k) => (
+              {availableKeys.map((k) => (
                 <option key={k} value={k} className="bg-slate-800 text-slate-100">
                   {k} キー
                 </option>

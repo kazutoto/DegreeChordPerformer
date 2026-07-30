@@ -106,11 +106,6 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
 
         {/* Left-Hand Modifiers Controls */}
         <div className="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800/90 space-y-2">
-          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between px-1">
-            <span>左手修飾キー</span>
-            <span className="text-[10px] text-slate-500">Shift/Ctrl/A/S/D/Z/X/C/V</span>
-          </div>
-
           <div className="space-y-1.5">
             {/* Row 1: Shift, Ctrl */}
             <div className="grid grid-cols-4 gap-1.5">

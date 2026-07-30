@@ -31,7 +31,7 @@ export const KeyboardGuide: React.FC = () => {
         <div className="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80">
           <div className="flex items-center gap-2 text-xs font-bold text-purple-300 mb-2">
             <span className="w-2 h-2 rounded-full bg-purple-500" />
-            左手: コード拡張 & 操作
+            コード拡張 & 操作
           </div>
           <div className="space-y-2 text-xs font-mono">
             {/* Row 1 */}
@@ -143,7 +143,7 @@ export const KeyboardGuide: React.FC = () => {
         <div className="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80">
           <div className="flex items-center gap-2 text-xs font-bold text-indigo-300 mb-2">
             <span className="w-2 h-2 rounded-full bg-indigo-500" />
-            右手: 和音 & ベース入力
+            和音 & ベース入力
           </div>
           <div className="mb-2 p-2 bg-slate-900 border border-slate-700 rounded-lg text-xs">
             <div className="flex justify-between items-center mb-1">
