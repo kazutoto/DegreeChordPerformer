@@ -15,6 +15,7 @@
  */
 import React from 'react';
 import { Keyboard, Command, HelpCircle } from 'lucide-react';
+import { getAltKeyName } from '../lib/os';
 
 export const KeyboardGuide: React.FC = () => {
   return (
@@ -47,7 +48,7 @@ export const KeyboardGuide: React.FC = () => {
                 </div>
               </div>
               <div className="bg-slate-900 border border-slate-700 rounded-lg p-2 flex items-center gap-2">
-                <kbd className="px-2 py-1 bg-pink-600 text-white rounded font-bold text-xs">Alt</kbd>
+                <kbd className="px-2 py-1 bg-pink-600 text-white rounded font-bold text-xs">{getAltKeyName()}</kbd>
                 <div>
                   <div className="text-pink-300 font-bold">♭ (Flat)</div>
                   <div className="text-[10px] text-slate-400">半音下げ</div>

@@ -15,6 +15,7 @@
  */
 import React from 'react';
 import { X, HelpCircle, Keyboard, Music, Activity } from 'lucide-react';
+import { getAltKeyName } from '../lib/os';
 
 interface HelpModalProps {
   isOpen: boolean;
@@ -83,7 +84,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                 <strong className="text-white">左手修飾キー S (sus4コード):</strong> <code className="text-amber-300 font-mono">S</code> キーを押しながらテンキーを押すと、第3音が完全4度（sus4）に置き換わったコード (sus4 / 7sus4) に変化します。
               </li>
               <li>
-                <strong className="text-white">左手修飾キー Alt/Option (フラット):</strong> <code className="text-pink-300 font-mono">Alt</code> (Macは <code className="text-pink-300 font-mono">Option</code>) キーを押しながらテンキーを押すと、和音全体が半音下がったフラットコードとして演奏されます。
+                <strong className="text-white">左手修飾キー {getAltKeyName()} (フラット):</strong> <code className="text-pink-300 font-mono">{getAltKeyName()}</code> キーを押しながらテンキーを押すと、和音全体が半音下がったフラットコードとして演奏されます。
               </li>
               <li>
                 <strong className="text-white">W キー (Strum / ストローク):</strong> <code className="text-cyan-300 font-mono">W</code> キーでギターのように和音を1音ずつ時間差でジャカジャーンと鳴らす Strum オプションの On/Off を切り替えます。

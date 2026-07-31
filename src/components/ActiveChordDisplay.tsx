@@ -16,6 +16,7 @@
 import React from 'react';
 import { ActiveChord } from '../types';
 import { Volume2, Layers, Hash } from 'lucide-react';
+import { getAltKeyName } from '../lib/os';
 
 interface ActiveChordDisplayProps {
   activeChord: ActiveChord | null;
@@ -119,7 +120,7 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                 }`}
               >
                 <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasSwapModifier ? 'bg-black/30 text-slate-100' : 'bg-emerald-600 text-white'}`}>[Ctrl / 0]</span>
-                <span>{hasSwapModifier ? 'Maj ⇄ Min' : 'OFF'}</span>
+                <span>{hasSwapModifier ? 'Maj ⇄ Min' : 'Swap OFF'}</span>
               </button>
 
               {/* Alt Key Flat Modifier */}
@@ -130,7 +131,7 @@ export const ActiveChordDisplay: React.FC<ActiveChordDisplayProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400'
                 }`}
               >
-                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasFlatModifier ? 'bg-black/30 text-slate-100' : 'bg-pink-600 text-white'}`}>[Alt]</span>
+                <span className={`text-[10px] font-mono px-1 rounded mb-0.5 ${hasFlatModifier ? 'bg-black/30 text-slate-100' : 'bg-pink-600 text-white'}`}>[{getAltKeyName()}]</span>
                 <span>♭ (Flat) {hasFlatModifier ? 'ON' : 'OFF'}</span>
               </div>
             </div>
