@@ -100,6 +100,18 @@ export default function App() {
     return 'sharp';
   };
 
+  const getValidKeyForScale = (key: NoteName, scale: ScaleType): NoteName => {
+    const isMinor = scale.includes('minor') || scale === 'dorian' || scale === 'phrygian';
+    const isMajor = scale === 'major' || scale === 'lydian' || scale === 'mixolydian';
+
+    if (isMajor && (key === 'D#' || key === 'G#' || key === 'A#')) {
+      return key === 'D#' ? 'Eb' : key === 'G#' ? 'Ab' : 'Bb';
+    } else if (isMinor && (key === 'Db' || key === 'Gb' || key === 'Ab' || key === 'A#')) {
+      return key === 'Db' ? 'C#' : key === 'Gb' ? 'F#' : key === 'Ab' ? 'G#' : 'Bb';
+    }
+    return key;
+  };
+
   const handleKeyChange = (newKey: NoteName) => {
     setSelectedKey(newKey);
     setAccidentalPref(getAutoAccidentalPref(newKey, scaleType));
@@ -108,16 +120,7 @@ export default function App() {
   const handleScaleChange = (newScale: ScaleType) => {
     setScaleType(newScale);
 
-    const isMinor = newScale.includes('minor') || newScale === 'dorian' || newScale === 'phrygian';
-    const isMajor = newScale === 'major' || newScale === 'lydian' || newScale === 'mixolydian';
-
-    let newKey = selectedKey;
-
-    if (isMajor && (selectedKey === 'D#' || selectedKey === 'G#' || selectedKey === 'A#')) {
-      newKey = selectedKey === 'D#' ? 'Eb' : selectedKey === 'G#' ? 'Ab' : 'Bb';
-    } else if (isMinor && (selectedKey === 'Db' || selectedKey === 'Gb' || selectedKey === 'Ab' || selectedKey === 'A#')) {
-      newKey = selectedKey === 'Db' ? 'C#' : selectedKey === 'Gb' ? 'F#' : selectedKey === 'Ab' ? 'G#' : 'Bb';
-    }
+    const newKey = getValidKeyForScale(selectedKey, newScale);
 
     if (newKey !== selectedKey) {
       setSelectedKey(newKey);
@@ -573,23 +576,30 @@ export default function App() {
         return;
       }
 
+      const applyTranspose = (delta: number) => {
+        const rawNewKey = transposeKey(stateRef.current.selectedKey, delta, stateRef.current.accidentalPref);
+        const validNewKey = getValidKeyForScale(rawNewKey, stateRef.current.scaleType);
+        setSelectedKey(validNewKey);
+        setAccidentalPref(getAutoAccidentalPref(validNewKey, stateRef.current.scaleType));
+      };
+
       // Handle + / - keys (Numpad or Keyboard) for Key Semitone Down/Up
       if (code === 'NumpadSubtract' || code === 'Minus' || key === '-') {
-        setSelectedKey((prev) => transposeKey(prev, -1, stateRef.current.accidentalPref));
+        applyTranspose(-1);
         return;
       }
       if (code === 'NumpadAdd' || code === 'Equal' || key === '+' || key === ';') {
-        setSelectedKey((prev) => transposeKey(prev, 1, stateRef.current.accidentalPref));
+        applyTranspose(1);
         return;
       }
 
       // Handle * / / keys (Numpad or Keyboard) for Key 5 Semitones Down/Up
       if (code === 'NumpadMultiply' || key === '*') {
-        setSelectedKey((prev) => transposeKey(prev, 5, stateRef.current.accidentalPref));
+        applyTranspose(5);
         return;
       }
       if (code === 'NumpadDivide' || key === '/') {
-        setSelectedKey((prev) => transposeKey(prev, -5, stateRef.current.accidentalPref));
+        applyTranspose(-5);
         return;
       }
 
