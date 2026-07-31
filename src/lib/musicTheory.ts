@@ -205,7 +205,9 @@ export function getDegreesForScale(
   hasAugModifier: boolean = false,
   hasFlatModifier: boolean = false,
   hasSixthModifier: boolean = false,
-  hasHalfDimModifier: boolean = false
+  hasHalfDimModifier: boolean = false,
+  voicingStyle: VoicingStyle = 'close',
+  isInstaChordMode: boolean = false
 ): DegreeInfo[] {
   let rootPitch = noteToPitchClass(keyRoot);
   if (hasFlatModifier) {
@@ -214,6 +216,9 @@ export function getDegreesForScale(
   const scalePitches = SCALE_INTERVALS[scaleType].map((i) => (rootPitch + i) % 12);
 
   const result: DegreeInfo[] = [];
+  
+  const isMajor = scaleType === 'major' || scaleType === 'lydian' || scaleType === 'mixolydian';
+  const isMinor = scaleType === 'minor' || scaleType === 'dorian' || scaleType === 'phrygian';
 
   for (let d = 1; d <= 7; d++) {
     const idx = d - 1;
@@ -222,6 +227,14 @@ export function getDegreesForScale(
     let deg5thPitch = scalePitches[(idx + 4) % 7];
     let deg7thPitch = scalePitches[(idx + 6) % 7];
     let deg9thPitch = scalePitches[(idx + 1) % 7];
+
+    if (isInstaChordMode) {
+      const thirdInterval = (deg3rdPitch - degRootPitch + 12) % 12;
+      const fifthInterval = (deg5thPitch - degRootPitch + 12) % 12;
+      if (thirdInterval === 3 && fifthInterval === 6) {
+        deg5thPitch = (degRootPitch + 7) % 12;
+      }
+    }
 
     if (hasSixthModifier) {
       deg7thPitch = (degRootPitch + 9) % 12; // 長6度 (M6)
@@ -407,7 +420,9 @@ export function constructChordMidiNotes(
   hasFlatModifier: boolean = false,
   hasSixthModifier: boolean = false,
   hasHalfDimModifier: boolean = false,
-  slashBassDegree: number | null = null
+  slashBassDegree: number | null = null,
+  isInstaChordMode: boolean = false,
+  previousChordNotes: number[] | null = null
 ): ActiveChord {
   const baseRootPitch = noteToPitchClass(keyRoot);
   let rootPitch = baseRootPitch;
@@ -446,6 +461,14 @@ export function constructChordMidiNotes(
   let seventhMidi = useSeventh ? getMidiForScaleOffset(6) : null;
   let ninthMidi = hasNinth ? getMidiForScaleOffset(8) : null;
 
+  if (isInstaChordMode) {
+    const thirdInterval = ((thirdMidi - rootMidi) % 12 + 12) % 12;
+    const fifthInterval = ((fifthMidi - rootMidi) % 12 + 12) % 12;
+    if (thirdInterval === 3 && fifthInterval === 6) {
+      fifthMidi = rootMidi + 7;
+    }
+  }
+
   if (hasSus4Modifier) {
     thirdMidi = rootMidi + 5; // 完全4度 (sus4)
     fifthMidi = rootMidi + 7; // 完全5度
@@ -479,13 +502,56 @@ export function constructChordMidiNotes(
     seventhMidi = rootMidi + 11; // 長7度 (M7)
   }
 
-  let rawNotes: number[] = [rootMidi, thirdMidi, fifthMidi];
+  let rawNotes: number[] = [];
+  rawNotes = [rootMidi, thirdMidi, fifthMidi];
   if (seventhMidi !== null) rawNotes.push(seventhMidi);
   if (ninthMidi !== null) rawNotes.push(ninthMidi);
 
   // Apply Voicing
   let voicedNotes = [...rawNotes];
-  if (voicing === 'open') {
+
+  if (voicing === 'voiceLeading' && previousChordNotes && previousChordNotes.length > 0) {
+    let bestVoicing = [...rawNotes];
+    let minDistance = Infinity;
+    
+    // Calculate the center of the previous chord
+    const prevCenter = previousChordNotes.reduce((a, b) => a + b, 0) / previousChordNotes.length;
+    const sortedPrev = [...previousChordNotes].sort((a, b) => a - b);
+    
+    // Try different octaves and inversions to find the smoothest transition
+    for (let oct = -2; oct <= 2; oct++) {
+      for (let inv = 0; inv < rawNotes.length; inv++) {
+        let candidate = [...rawNotes].map(n => n + oct * 12);
+        for (let i = 0; i < inv; i++) {
+          const lowest = candidate.shift()!;
+          candidate.push(lowest + 12);
+        }
+        
+        const candidateCenter = candidate.reduce((a, b) => a + b, 0) / candidate.length;
+        const centerDistance = Math.abs(candidateCenter - prevCenter);
+        
+        // Calculate voice movement distance
+        let voiceDistance = 0;
+        const sortedCand = [...candidate].sort((a, b) => a - b);
+        const minLen = Math.min(sortedPrev.length, sortedCand.length);
+        for(let i=0; i<minLen; i++){
+            voiceDistance += Math.abs(sortedPrev[i] - sortedCand[i]);
+        }
+        
+        // Penalize extra notes if lengths mismatch
+        const maxLen = Math.max(sortedPrev.length, sortedCand.length);
+        voiceDistance += (maxLen - minLen) * 4; // penalty
+        
+        const score = centerDistance * 0.5 + voiceDistance;
+        
+        if (score < minDistance) {
+          minDistance = score;
+          bestVoicing = candidate;
+        }
+      }
+    }
+    voicedNotes = bestVoicing;
+  } else if (voicing === 'open') {
     // Raise 2nd note (3rd) or 3rd note (5th) by 1 octave
     if (voicedNotes.length >= 3) {
       voicedNotes[1] += 12;
@@ -529,7 +595,7 @@ export function constructChordMidiNotes(
   const noteNames = voicedNotes.map((m) => midiToNoteName(m, accidentalPref));
 
   // Determine chord name & roman numeral
-  const degInfos = getDegreesForScale(keyRoot, scaleType, accidentalPref, hasSwapModifier, hasDimModifier, hasSus4Modifier, hasM7Modifier, hasAugModifier, hasFlatModifier, hasSixthModifier, hasHalfDimModifier);
+  const degInfos = getDegreesForScale(keyRoot, scaleType, accidentalPref, hasSwapModifier, hasDimModifier, hasSus4Modifier, hasM7Modifier, hasAugModifier, hasFlatModifier, hasSixthModifier, hasHalfDimModifier, voicing, isInstaChordMode);
   const degInfo = degInfos[idx];
 
   let displayChordName = degInfo.triadChordName;

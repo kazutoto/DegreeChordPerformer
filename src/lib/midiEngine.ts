@@ -36,6 +36,7 @@ class MidiEngine {
 
   private stateChangeListeners: ((state: MidiState) => void)[] = [];
   private activeMidiNotes: Set<number> = new Set();
+  private pendingTimeouts: ReturnType<typeof setTimeout>[] = [];
 
   constructor() {
     this.checkSupport();
@@ -213,9 +214,10 @@ class MidiEngine {
       const delayMs = isStrum ? index * strumDelayMs : 0;
       if (!this.activeMidiNotes.has(note)) {
         if (delayMs > 0) {
-          setTimeout(() => {
+          const t = setTimeout(() => {
             this.sendNoteOn(note, velocity);
           }, delayMs);
+          this.pendingTimeouts.push(t);
         } else {
           this.sendNoteOn(note, velocity);
         }
@@ -223,8 +225,14 @@ class MidiEngine {
     });
   }
 
+  public clearPendingTimeouts() {
+    this.pendingTimeouts.forEach(clearTimeout);
+    this.pendingTimeouts = [];
+  }
+
   // Stop all active MIDI notes
   public sendAllNotesOff() {
+    this.clearPendingTimeouts();
     this.activeMidiNotes.forEach((note) => {
       this.sendNoteOff(note);
     });
@@ -248,6 +256,7 @@ class MidiEngine {
   }
 
   private stopNotesExcept(keepNotes: number[]) {
+    this.clearPendingTimeouts();
     const keepSet = new Set(keepNotes);
     this.activeMidiNotes.forEach((note) => {
       if (!keepSet.has(note)) {

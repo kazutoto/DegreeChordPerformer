@@ -31,7 +31,7 @@ export type AccidentalPreference = 'sharp' | 'flat';
 
 export type SoundPreset = 'piano' | 'epiano' | 'synth' | 'organ' | 'pad';
 
-export type VoicingStyle = 'close' | 'open' | 'drop2';
+export type VoicingStyle = 'close' | 'open' | 'drop2' | 'voiceLeading';
 
 export interface DegreeInfo {
   degreeNumber: number; // 1 to 7

@@ -43,7 +43,7 @@ export default function App() {
   const [scaleType, setScaleType] = useState<ScaleType>('major');
   const [accidentalPref, setAccidentalPref] = useState<AccidentalPreference>('sharp');
   const [baseOctave, setBaseOctave] = useState<number>(3);
-  const [voicingStyle, setVoicingStyle] = useState<VoicingStyle>('close');
+  const [voicingStyle, setVoicingStyle] = useState<VoicingStyle>('voiceLeading');
 
   // Sound Engine
   const [soundPreset, setSoundPreset] = useState<SoundPreset>('piano');
@@ -61,6 +61,7 @@ export default function App() {
   const [hasSixthModifier, setHasSixthModifier] = useState<boolean>(false);
   const [hasHalfDimModifier, setHasHalfDimModifier] = useState<boolean>(false);
   const [isStrumEnabled, setIsStrumEnabled] = useState<boolean>(false);
+  const [isInstaChordMode, setIsInstaChordMode] = useState<boolean>(true);
   const [inversion, setInversion] = useState<number>(0);
   const [sustainActive, setSustainActive] = useState<boolean>(false);
 
@@ -70,7 +71,6 @@ export default function App() {
   const [slashBassDegree, setSlashBassDegree] = useState<number | null>(null);
 
   // Recording State
-  const [isRecording, setIsRecording] = useState<boolean>(true);
   const [recordedChords, setRecordedChords] = useState<RecordedChord[]>([]);
   const chordStartTimeRef = useRef<number | null>(null);
 
@@ -143,6 +143,7 @@ export default function App() {
   }, [masterVolume]);
 
   // Ref to hold current state values inside window keyboard listeners
+  const previousChordNotesRef = useRef<number[] | null>(null);
   const stateRef = useRef({
     selectedKey,
     scaleType,
@@ -160,12 +161,12 @@ export default function App() {
     hasSixthModifier,
     hasHalfDimModifier,
     isStrumEnabled,
+    isInstaChordMode,
     inversion,
     sustainActive,
     activeDegreeNumber,
     slashBassDegree,
     activeSlashBassKeys: [] as number[],
-    isRecording,
   });
 
   useEffect(() => {
@@ -187,11 +188,11 @@ export default function App() {
       hasSixthModifier,
       hasHalfDimModifier,
       isStrumEnabled,
+      isInstaChordMode,
       inversion,
       sustainActive,
       activeDegreeNumber,
       slashBassDegree,
-      isRecording,
     };
   }, [
     selectedKey,
@@ -210,11 +211,11 @@ export default function App() {
     hasSixthModifier,
     hasHalfDimModifier,
     isStrumEnabled,
+    isInstaChordMode,
     inversion,
     sustainActive,
     activeDegreeNumber,
     slashBassDegree,
-    isRecording,
   ]);
 
   // Core Play Chord Function
@@ -266,8 +267,12 @@ export default function App() {
         useFlat,
         useSixth,
         useHalfDim,
-        s.slashBassDegree
+        s.slashBassDegree,
+        s.isInstaChordMode,
+        previousChordNotesRef.current
       );
+
+      previousChordNotesRef.current = chord.midiNotes;
 
       setActiveDegreeNumber(degreeNum);
       setActiveChord(chord);
@@ -286,18 +291,16 @@ export default function App() {
 
       chordStartTimeRef.current = Date.now();
 
-      // Record if enabled
-      if (s.isRecording) {
-        const newRecorded: RecordedChord = {
-          id: `${Date.now()}-${Math.random()}`,
-          timestamp: Date.now(),
-          degreeRoman: chord.degreeRoman,
-          chordName: chord.chordName,
-          notes: chord.notes,
-          midiNotes: chord.midiNotes,
-        };
-        setRecordedChords((prev) => [...prev, newRecorded]);
-      }
+      // Record chord
+      const newRecorded: RecordedChord = {
+        id: `${Date.now()}-${Math.random()}`,
+        timestamp: Date.now(),
+        degreeRoman: chord.degreeRoman,
+        chordName: chord.chordName,
+        notes: chord.notes,
+        midiNotes: chord.midiNotes,
+      };
+      setRecordedChords((prev) => [...prev, newRecorded]);
     },
     []
   );
@@ -560,6 +563,7 @@ export default function App() {
       // Handle Q key to clear chord history
       if (code === 'KeyQ' || key === 'q' || key === 'Q') {
         setRecordedChords([]);
+        previousChordNotesRef.current = null;
         return;
       }
 
@@ -1116,6 +1120,9 @@ export default function App() {
               hasSixthModifier={hasSixthModifier}
               hasHalfDimModifier={hasHalfDimModifier}
               slashBassDegree={slashBassDegree}
+              voicingStyle={voicingStyle}
+              isInstaChordMode={isInstaChordMode}
+              onToggleInstaChordMode={() => setIsInstaChordMode(!isInstaChordMode)}
               onPlayDegreeStart={(degNum) => triggerPlayDegree(degNum)}
               onPlayDegreeEnd={() => triggerStopChord()}
             />
@@ -1126,10 +1133,11 @@ export default function App() {
         <div className="w-full">
           <ChordRecorder
             recordedChords={recordedChords}
-            onClearHistory={() => setRecordedChords([])}
+            onClearHistory={() => {
+              setRecordedChords([]);
+              previousChordNotesRef.current = null;
+            }}
             onRemoveChord={handleRemoveChord}
-            isRecording={isRecording}
-            onToggleRecording={() => setIsRecording(!isRecording)}
             selectedKey={selectedKey}
             scaleType={scaleType}
           />

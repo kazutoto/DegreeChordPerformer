@@ -33,6 +33,9 @@ interface DegreeChordGridProps {
   hasSixthModifier?: boolean;
   hasHalfDimModifier?: boolean;
   slashBassDegree?: number | null;
+  voicingStyle?: string;
+  isInstaChordMode?: boolean;
+  onToggleInstaChordMode?: () => void;
   onPlayDegreeStart: (degreeNumber: number) => void;
   onPlayDegreeEnd: () => void;
 }
@@ -53,6 +56,9 @@ export const DegreeChordGrid: React.FC<DegreeChordGridProps> = ({
   hasSixthModifier = false,
   hasHalfDimModifier = false,
   slashBassDegree = null,
+  voicingStyle = 'voiceLeading',
+  isInstaChordMode = true,
+  onToggleInstaChordMode,
   onPlayDegreeStart,
   onPlayDegreeEnd,
 }) => {
@@ -67,7 +73,9 @@ export const DegreeChordGrid: React.FC<DegreeChordGridProps> = ({
     hasAugModifier,
     hasFlatModifier,
     hasSixthModifier,
-    hasHalfDimModifier
+    hasHalfDimModifier,
+    voicingStyle as any,
+    isInstaChordMode
   );
 
   // Map degrees by number for numpad layout
@@ -205,9 +213,26 @@ export const DegreeChordGrid: React.FC<DegreeChordGridProps> = ({
   );
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl">
+    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-slate-300">Chord PAD</h3>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <span className="text-xs font-semibold text-slate-400">InstaChord Mode(Auto Minor)</span>
+          <div className="relative">
+            <input
+              type="checkbox"
+              className="sr-only"
+              checked={isInstaChordMode}
+              onChange={onToggleInstaChordMode}
+            />
+            <div className={`block w-10 h-6 rounded-full transition-colors ${isInstaChordMode ? 'bg-indigo-500' : 'bg-slate-700'}`}></div>
+            <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${isInstaChordMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
+          </div>
+        </label>
+      </div>
+
       {/* Numpad 3x3 Grid Layout */}
-      <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto w-full flex-1">
         {/* Top Row: Num 7 (VII), Num 8 (Unused), Num 9 (Unused) */}
         {degMap.has(7) ? renderDegreeCard(degMap.get(7)!) : null}
         {renderDummySlot(8, '未使用')}

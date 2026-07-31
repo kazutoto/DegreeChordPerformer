@@ -23,8 +23,6 @@ interface ChordRecorderProps {
   recordedChords: RecordedChord[];
   onClearHistory: () => void;
   onRemoveChord?: (id: string) => void;
-  isRecording: boolean;
-  onToggleRecording: () => void;
   selectedKey?: NoteName;
   scaleType?: ScaleType;
 }
@@ -33,8 +31,6 @@ export const ChordRecorder: React.FC<ChordRecorderProps> = ({
   recordedChords,
   onClearHistory,
   onRemoveChord,
-  isRecording,
-  onToggleRecording,
   selectedKey = 'C',
   scaleType = 'major',
 }) => {
@@ -82,7 +78,7 @@ export const ChordRecorder: React.FC<ChordRecorderProps> = ({
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3 mb-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <Disc className={`w-4 h-4 ${isRecording ? 'text-red-500 animate-pulse' : 'text-indigo-400'}`} />
+          <Disc className="w-4 h-4 text-indigo-400" />
           <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
             直近のコード進行
             <span className="text-[10px] font-normal normal-case text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">
@@ -95,19 +91,6 @@ export const ChordRecorder: React.FC<ChordRecorderProps> = ({
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Record Toggle */}
-          <button
-            onClick={onToggleRecording}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-              isRecording
-                ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/30'
-                : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            <span className={`w-2 h-2 rounded-full ${isRecording ? 'bg-white animate-ping' : 'bg-red-500'}`} />
-            {isRecording ? '記録中' : '記録停止中'}
-          </button>
-
           {/* Copy Chord Names Button */}
           <button
             disabled={recordedChords.length === 0}

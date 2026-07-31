@@ -145,11 +145,12 @@ export const KeyScaleSelector: React.FC<KeyScaleSelectorProps> = ({
         {/* Voicing Style */}
         <div className="flex flex-col gap-1">
           <label className="text-[11px] font-semibold text-slate-400">ボイシング配置</label>
-          <div className="grid grid-cols-3 gap-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
+          <div className="grid grid-cols-4 gap-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
             {[
               { id: 'close', label: 'Close' },
               { id: 'open', label: 'Open' },
               { id: 'drop2', label: 'Drop 2' },
+              { id: 'voiceLeading', label: '順次進行' },
             ].map((v) => (
               <button
                 key={v.id}
